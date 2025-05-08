@@ -23,7 +23,7 @@ const AboutEditor = () => {
       {/* Buttons Section */}
       <div className='flex flex-col gap-10'>
         <button className="btn btn-primary" onClick={() => setAbout1Open(true)}>About 1</button>
-        {/* <button className="btn btn-primary" onClick={() => setAbout2Open(true)}>About 2</button> */}
+        <button className="btn btn-primary" onClick={() => setAbout2Open(true)}>About 2</button>
         {/* <button className="btn btn-primary" onClick={() => setFAQOpen(true)}>Core Values</button> */}
 
         <button className="btn btn-primary" onClick={() => setMessageOpen(true)}>Message</button>
@@ -46,7 +46,7 @@ const AboutEditor = () => {
 
       {/* Modal Components */}
       <About1Modal isOpen={isAbout1Open} onClose={() => setAbout1Open(false)} />
-      {/* <About2Modal isOpen={isAbout2Open} onClose={() => setAbout2Open(false)} /> */}
+      <About2Modal isOpen={isAbout2Open} onClose={() => setAbout2Open(false)} />
       <MessageModal isOpen={messageOpen} onClose={() => setMessageOpen(false)} />
       <TeamModal isOpen={isTeamOpen} onClose={() => setTeamOpen(false)} />
       {/* <CoreValuesModal isOpen={isFAQOpen} onClose={() => setFAQOpen(false)} /> */}

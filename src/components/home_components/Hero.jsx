@@ -1,210 +1,149 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Spin, Statistic, Row, Col, Tag } from 'antd';
-import { PlayCircleOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
 
-const DEFAULT_DATA = {
-  headline: "Building Dreams, Crafting Reality",
-  subheadline: "Premium Construction Services",
-  tagline: "Stech Builders delivers exceptional construction services with 15+ years of experience in residential and commercial projects.",
-  primaryButton: {
-    text: "Get Free Quote",
-    link: "/contact"
-  },
-  secondaryButton: {
-    text: "View Projects",
-    link: "/projects"
-  },
-  backgroundImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-  stats: [
-    {
-      value: "15+",
-      label: "Years Experience"
+const HeroSection = () => {
+  const [heroData, setHeroData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  const demodata = {
+    title: "Kaf Tar - Premier Facility Management",
+    subtitle: "Delivering exceptional operation & maintenance services across Saudi Arabia",
+    highlightText: "CERTIFIED PROFESSIONALS | 24/7 SUPPORT | QUALITY GUARANTEED",
+    ctaButton: {
+      text: "Request Free Consultation",
+      link: "/contact"
     },
-    {
-      value: "200+",
-      label: "Projects Completed"
-    },
-    {
-      value: "50+",
-      label: "Happy Clients"
-    }
-  ],
-  featuredServices: [
-    "Residential Construction",
-    "Commercial Projects",
-    "Renovations"
-  ],
-  ctaStyle: {
-    primaryColor: "#2ecc71", // Vibrant green
-    secondaryColor: "#f1c40f", // Vibrant yellow
-    textColor: "#ffffff"
-  }
-};
-
-const Hero = ({ isEditing = false, onEdit }) => {
-  const [heroData, setHeroData] = useState(DEFAULT_DATA);
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+    stats: [
+      { value: "500+", label: "Facilities Managed", icon: "building" },
+      { value: "99%", label: "Client Satisfaction", icon: "heart" },
+      { value: "24/7", label: "Emergency Response", icon: "shield" },
+      { value: "ISO", label: "Certified Quality", icon: "certificate" }
+    ],
+    backgroundImage: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+  };
 
   useEffect(() => {
     const fetchHeroData = async () => {
       try {
-        setIsLoading(true);
-        const apiUrl = import.meta.env.VITE_API_URL;
-        const response = await fetch(`${apiUrl}/home/hero/`);
+        setLoading(true);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/home/hero/`);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch hero data');
+          throw new Error('Network response was not ok');
         }
+        
         const data = await response.json();
         setHeroData(data);
-      } catch (err) {
-        console.error('Error fetching hero data:', err);
-        setError(err.message);
-        // Fall back to default data
-        setHeroData(DEFAULT_DATA);
+      } catch (error) {
+        console.log('Using default hero data due to:', error.message);
+        setHeroData(demodata);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
-
+  
     fetchHeroData();
   }, []);
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <Spin size="large" />
+      <div className="flex items-center justify-center h-screen bg-[#0b675a]">
+        <div className="animate-pulse text-white text-xl">Loading...</div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="text-center py-10 text-red-500">
-        Error loading hero section: {error}
-      </div>
-    );
-  }
+  if (!heroData) return null;
 
   return (
-    <section 
-      className="relative h-screen min-h-[600px] flex items-center overflow-hidden"
-      style={{
-        backgroundImage: `linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(46, 204, 113, 0.3) 100%), url(${heroData.backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
-      {/* Edit Button (only shown in admin mode) */}
-      {isEditing && (
-        <button 
-          onClick={onEdit}
-          className="absolute top-4 right-4 z-10 bg-white text-green-600 px-4 py-2 rounded-lg shadow-md hover:bg-green-50 transition-all font-semibold"
-        >
-          Edit Hero
-        </button>
-      )}
-
-      <div className="container mx-auto px-6 z-10">
+    <section className="relative h-screen max-h-[900px] overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center z-0"
+        style={{ 
+          backgroundImage: `url(${heroData.backgroundImage})`,
+          backgroundPosition: 'center center'
+        }}
+      ></div>
+      
+      {/* Gradient Overlay - Using brand colors */}
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          background: 'linear-gradient(135deg, rgba(11, 103, 90, 0.85) 0%, rgba(106, 48, 140, 0.7) 100%)'
+        }}
+      ></div>
+      
+      {/* Subtle Radial Gradient for focal point */}
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          background: 'radial-gradient(ellipse at center, rgba(244, 206, 20, 0.15) 0%, transparent 70%)'
+        }}
+      ></div>
+      
+      {/* Content Container */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 h-full flex flex-col justify-center">
         <div className="max-w-2xl">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg">
-            {heroData.headline}
-            <span className="block w-20 h-2 bg-green-400 mt-4 rounded-full"></span>
+          {/* Main Title */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+            {heroData.title}
+            <span className="block w-20 h-1 bg-[#f4ce14] mt-4"></span>
           </h1>
           
-          <h2 className="text-xl md:text-2xl text-green-300 mb-6 font-medium">
-            {heroData.subheadline}
-          </h2>
-          
-          <p className="text-white text-lg mb-8 max-w-lg leading-relaxed">
-            {heroData.tagline}
+          {/* Subtitle */}
+          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-lg">
+            {heroData.subtitle}
           </p>
           
-          {/* Featured Services */}
-          <div className="flex flex-wrap gap-2 mb-8">
-            {heroData?.featuredServices?.map((service, index) => (
-              <Tag 
-                key={index} 
-                icon={<CheckCircleOutlined className="text-green-400" />}
-                className="bg-black bg-opacity-40 text-white border border-green-400 rounded-full px-4 py-1 text-sm md:text-base hover:bg-green-500 hover:bg-opacity-30 transition-all"
-              >
-                {service}
-              </Tag>
-            ))}
+          {/* Highlight Text */}
+          <div className="flex items-center mb-10">
+            <div className="h-1 w-16 bg-[#f4ce14] mr-4"></div>
+            <p className="text-[#f4ce14] font-medium tracking-wider uppercase text-sm">
+              {heroData.highlightText}
+            </p>
           </div>
           
-          {/* Call to Action Buttons */}
-          <div className="flex flex-wrap gap-4 mb-12">
-            <Button
-              href={heroData.primaryButton.link}
-              size="large"
-              style={{
-                backgroundColor: heroData.ctaStyle.primaryColor,
-                color: heroData.ctaStyle.textColor,
-                border: 'none',
-                fontWeight: 600,
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-              }}
-              className="px-8 h-12 hover:bg-green-600 hover:transform hover:scale-105 transition-all duration-300 rounded-lg"
+          {/* CTA Button */}
+          <a
+            href={heroData.ctaButton.link}
+            className="inline-flex items-center px-8 py-4 bg-[#f4ce14] text-[#0b675a] font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:bg-[#f8d83a]"
+            style={{ boxShadow: '0 4px 14px rgba(244, 206, 20, 0.4)' }}
+          >
+            {heroData.ctaButton.text}
+            <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+        </div>
+        
+        {/* Stats Grid */}
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl">
+          {heroData.stats.map((stat, index) => (
+            <div 
+              key={index}
+              className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-xl border border-white/20 hover:border-[#f4ce14] transition-all duration-300 group"
+              style={{ backdropFilter: 'blur(8px)' }}
             >
-              {heroData.primaryButton.text}
-            </Button>
-            
-            <Button
-              href={heroData.secondaryButton.link}
-              size="large"
-              style={{
-                backgroundColor: heroData.ctaStyle.secondaryColor,
-                color: '#2c3e50',
-                border: 'none',
-                fontWeight: 600,
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-              }}
-              className="px-8 h-12 hover:bg-yellow-500 hover:transform hover:scale-105 transition-all duration-300 rounded-lg"
-            >
-              {heroData.secondaryButton.text}
-            </Button>
-          </div>
-          
-          {/* Statistics */}
-          <Row gutter={16} className="bg-black bg-opacity-40 backdrop-blur-sm rounded-lg p-6 max-w-3xl border border-green-400 border-opacity-30">
-            {heroData.stats.map((stat, index) => (
-              <Col xs={24} sm={8} key={index} className="mb-4 sm:mb-0">
-                <Statistic
-                  title={<span className="text-green-300 font-medium">{stat.label}</span>}
-                  value={stat.value}
-                  valueStyle={{ 
-                    color: '#fff', 
-                    fontSize: '32px', 
-                    fontWeight: 'bold',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                  }}
-                  className="text-center"
-                  prefix={
-                    <span className="inline-block w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-                  }
-                />
-              </Col>
-            ))}
-          </Row>
+              <p className="text-3xl sm:text-4xl font-bold text-[#f4ce14] mb-2 group-hover:scale-105 transition-transform">
+                {stat.value}
+              </p>
+              <p className="text-white/90 text-sm sm:text-base">{stat.label}</p>
+            </div>
+          ))}
         </div>
       </div>
       
-      {/* Decorative Elements */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <svg 
-          className="w-10 h-10 text-green-400 drop-shadow-lg" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-          style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-        </svg>
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10">
+        <div className="animate-bounce flex flex-col items-center">
+          <p className="text-white/80 text-xs mb-1">Scroll Down</p>
+          <svg className="w-6 h-6 text-[#f4ce14]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+          </svg>
+        </div>
       </div>
     </section>
   );
 };
 
-export default Hero;
+export default HeroSection;

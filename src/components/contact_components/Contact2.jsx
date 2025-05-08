@@ -1,315 +1,300 @@
-import React, { useState, useEffect } from "react";
-import { motion, useAnimation } from "framer-motion";
-import { useInView } from "react-intersection-observer";
-import { FaPhone, FaMapMarkerAlt, FaEnvelope, FaClock, FaFacebook, FaLinkedin, FaInstagram } from "react-icons/fa";
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
-const Contact2 = () => {
+const ContactInfo = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
-  const controls = useAnimation();
-  const [ref, inView] = useInView({
-    threshold: 0.1,
-    triggerOnce: false
+  const [data, setData] = useState({
+    sectionTitle: "",
+    sectionSubtitle: "",
+    contactPoints: [],
+    socialMedia: []
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Sample data - in a real app you would fetch this from API
-  const sampleData = {
-    title: "Contact Us",
-    subtitle: "Reach Out To Us",
-    phoneNumbers: [
-      "Main office: +880 1234-567890",
-      "Support line: +880 9876-543210"
-    ],
-    email: "Pagedone1234@gmail.com",
-    addresses: [
+  // Default data
+  const defaultData = {
+    sectionTitle: "Connect With Us",
+    sectionSubtitle: "We're always here to help with your facility management needs",
+    contactPoints: [
       {
-        heading: "Headquarters",
-        details: "123 Construction Lane, Tejgaon Industrial Area, Dhaka"
+        type: "Phone",
+        value: "+966 56 705 5580",
+        icon: "phone",
+        description: "Available 24/7 for emergency services"
       },
       {
-        heading: "Training Center",
-        details: "456 Builder Street, Agrabad Commercial Area, Chittagong"
+        type: "Email",
+        value: "info@kaftaroperations.com",
+        icon: "email",
+        description: "General inquiries and support"
       }
-    ],
-    businessHours: [
-      "Monday - Friday: 9:00 AM - 6:00 PM",
-      "Saturday: 10:00 AM - 4:00 PM",
-      "Sunday: Closed"
     ],
     socialMedia: [
       {
-        name: "Facebook",
-        url: "https://facebook.com/stechbuilders"
-      },
-      {
-        name: "LinkedIn",
-        url: "https://linkedin.com/company/stechbuilders"
-      },
-      {
-        name: "Instagram",
-        url: "https://instagram.com/stechbuilders"
+        platform: "LinkedIn",
+        url: "https://linkedin.com/company/kaftar",
+        icon: "linkedin"
       }
-    ],
-    imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
-    bgColor: "#2ecc71",
-    textColor: "#ffffff",
-    accentColor: "#f39c12"
+    ]
   };
-
-  const [contactData, setContactData] = useState(sampleData);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: ""
-  });
 
   useEffect(() => {
-    // In real app: fetch(`${apiUrl}/contact/contact2`).then(res => res.json()).then(data => setContactData(data));
-    if (inView) {
-      controls.start("visible");
-    }
-  }, [inView]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Submit form logic here
-    console.log("Form submitted:", formData);
-  };
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${apiUrl}/contact/contact2`);
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const result = await response.json();
+        
+        // Validate data
+        const validatedData = {
+          sectionTitle: result.sectionTitle || defaultData.sectionTitle,
+          sectionSubtitle: result.sectionSubtitle || defaultData.sectionSubtitle,
+          contactPoints: Array.isArray(result.contactPoints) ? result.contactPoints : defaultData.contactPoints,
+          socialMedia: Array.isArray(result.socialMedia) ? result.socialMedia : defaultData.socialMedia
+        };
+        
+        setData(validatedData);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError(err.message);
+        setData(defaultData);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    fetchData();
+  }, [apiUrl]);
+
+  const getIcon = (iconName) => {
+    const icons = {
+      phone: (
+        <svg className="w-8 h-8" fill="none" stroke="#7bbf42" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+        </svg>
+      ),
+      email: (
+        <svg className="w-8 h-8" fill="none" stroke="#f9b414" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+        </svg>
+      ),
+      location: (
+        <svg className="w-8 h-8" fill="none" stroke="#70308c" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+      ),
+      clock: (
+        <svg className="w-8 h-8" fill="none" stroke="#040404" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      ),
+      linkedin: (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+        </svg>
+      ),
+      twitter: (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+        </svg>
+      ),
+      instagram: (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+        </svg>
+      )
+    };
+    return icons[iconName] || <div className="w-8 h-8 rounded-full bg-gray-300"></div>;
   };
 
-  const itemVariants = {
-    hidden: { y: 30, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 10
-      }
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#7bbf42]"></div>
+      </div>
+    );
+  }
 
-  const cardVariants = {
-    hover: {
-      y: -5,
-      boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-      transition: { duration: 0.3 }
-    }
-  };
+  if (error) {
+    return (
+      <div className="text-center py-12 text-red-500">
+        Error loading contact info: {error}
+      </div>
+    );
+  }
 
   return (
-    <motion.section
-      ref={ref}
-      initial="hidden"
-      animate={controls}
-      variants={containerVariants}
-      className="py-16 px-4 sm:px-6 lg:px-8"
-      style={{ backgroundColor: contactData.bgColor }}
-    >
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div 
-          variants={itemVariants}
-          className="text-center mb-12"
+    <section className="relative py-20 overflow-hidden bg-white">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 overflow-hidden opacity-10">
+        <motion.div
+          animate={{
+            x: [0, 100, 0],
+            y: [0, 50, 0],
+            rotate: [0, 180, 360]
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute rounded-full"
+          style={{
+            width: '300px',
+            height: '300px',
+            background: 'radial-gradient(circle, rgba(123, 191, 66, 0.15) 0%, transparent 70%)',
+            top: '20%',
+            left: '10%'
+          }}
+        />
+        <motion.div
+          animate={{
+            x: [0, -100, 0],
+            y: [0, -50, 0],
+            rotate: [0, -180, -360]
+          }}
+          transition={{
+            duration: 40,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute rounded-full"
+          style={{
+            width: '400px',
+            height: '400px',
+            background: 'radial-gradient(circle, rgba(106, 48, 140, 0.1) 0%, transparent 70%)',
+            bottom: '20%',
+            right: '10%'
+          }}
+        />
+      </div>
+
+      <div className="container mx-auto px-6 relative z-10">
+        {/* Animated gradient title */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
         >
-          <motion.h2 
+          <motion.h2
+            animate={{
+              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            style={{
+              backgroundSize: '200% auto',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent',
+              backgroundImage: 'linear-gradient(90deg, #7bbf42, #f9b414, #70308c, #7bbf42)'
+            }}
             className="text-4xl md:text-5xl font-bold mb-4"
-            style={{ color: contactData.textColor }}
           >
-            {contactData.title}
+            {data.sectionTitle}
           </motion.h2>
-          <motion.p 
-            className="text-xl md:text-2xl max-w-3xl mx-auto"
-            style={{ color: contactData.textColor }}
-          >
-            {contactData.subtitle}
-          </motion.p>
+          <p className="text-xl text-[#7bbf42] max-w-2xl mx-auto">
+            {data.sectionSubtitle}
+          </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Info */}
-          <motion.div 
-            variants={itemVariants}
-            className="space-y-8"
-          >
-            {/* Phone Numbers */}
-            <motion.div 
-              variants={cardVariants}
-              whileHover="hover"
-              className="bg-white/10 backdrop-blur-sm p-6 rounded-xl shadow-lg border-2 border-white/20"
+        {/* Contact Points */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+          {data.contactPoints?.map((point, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -10 }}
+              className="bg-white p-8 rounded-xl shadow-lg border-t-4 hover:shadow-xl transition-all duration-300"
+              style={{
+                borderTopColor: 
+                  index % 4 === 0 ? '#7bbf42' : 
+                  index % 4 === 1 ? '#f9b414' : 
+                  index % 4 === 2 ? '#70308c' : '#040404'
+              }}
             >
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full mr-4" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                  <FaPhone className="text-2xl" style={{ color: contactData.textColor }} />
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-4">
+                  {getIcon(point.icon)}
                 </div>
-                <h3 className="text-xl font-semibold" style={{ color: contactData.textColor }}>Phone Numbers</h3>
-              </div>
-              <ul className="space-y-2">
-                {contactData.phoneNumbers.map((phone, index) => (
-                  <li key={index} className="flex items-center">
-                    <span className="text-lg" style={{ color: contactData.textColor }}>{phone}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-
-            {/* Email */}
-            <motion.div 
-              variants={cardVariants}
-              whileHover="hover"
-              className="bg-white/10 backdrop-blur-sm p-6 rounded-xl shadow-lg border-2 border-white/20"
-            >
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full mr-4" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                  <FaEnvelope className="text-2xl" style={{ color: contactData.textColor }} />
-                </div>
-                <h3 className="text-xl font-semibold" style={{ color: contactData.textColor }}>Email Address</h3>
-              </div>
-              <p className="text-lg" style={{ color: contactData.textColor }}>{contactData.email}</p>
-            </motion.div>
-
-            {/* Addresses */}
-            <motion.div 
-              variants={cardVariants}
-              whileHover="hover"
-              className="bg-white/10 backdrop-blur-sm p-6 rounded-xl shadow-lg border-2 border-white/20"
-            >
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full mr-4" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                  <FaMapMarkerAlt className="text-2xl" style={{ color: contactData.textColor }} />
-                </div>
-                <h3 className="text-xl font-semibold" style={{ color: contactData.textColor }}>Our Locations</h3>
-              </div>
-              <div className="space-y-4">
-                {contactData.addresses.map((address, index) => (
-                  <div key={index} className="space-y-1">
-                    <h4 className="font-medium" style={{ color: contactData.textColor }}>{address.heading}</h4>
-                    <p className="text-lg" style={{ color: contactData.textColor }}>{address.details}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Business Hours */}
-            <motion.div 
-              variants={cardVariants}
-              whileHover="hover"
-              className="bg-white/10 backdrop-blur-sm p-6 rounded-xl shadow-lg border-2 border-white/20"
-            >
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full mr-4" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                  <FaClock className="text-2xl" style={{ color: contactData.textColor }} />
-                </div>
-                <h3 className="text-xl font-semibold" style={{ color: contactData.textColor }}>Business Hours</h3>
-              </div>
-              <ul className="space-y-2">
-                {contactData.businessHours.map((hours, index) => (
-                  <li key={index} className="text-lg" style={{ color: contactData.textColor }}>{hours}</li>
-                ))}
-              </ul>
-            </motion.div>
-
-            {/* Social Media */}
-            <motion.div 
-              variants={cardVariants}
-              whileHover="hover"
-              className="bg-white/10 backdrop-blur-sm p-6 rounded-xl shadow-lg border-2 border-white/20"
-            >
-              <h3 className="text-xl font-semibold mb-4" style={{ color: contactData.textColor }}>Connect With Us</h3>
-              <div className="flex space-x-4">
-                {contactData.socialMedia.map((social, index) => (
-                  <motion.a
-                    key={index}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="p-3 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-                    style={{ color: contactData.textColor }}
+                <h3 className="text-xl font-bold text-[#040404] mb-2">
+                  {point.type}
+                </h3>
+                {point.type === 'Email' ? (
+                  <a 
+                    href={`mailto:${point.value}`} 
+                    className="text-lg text-[#70308c] hover:underline mb-2"
                   >
-                    {social.name === "Facebook" && <FaFacebook size={24} />}
-                    {social.name === "LinkedIn" && <FaLinkedin size={24} />}
-                    {social.name === "Instagram" && <FaInstagram size={24} />}
-                  </motion.a>
-                ))}
+                    {point.value}
+                  </a>
+                ) : point.type === 'Phone' ? (
+                  <a 
+                    href={`tel:${point.value.replace(/\s+/g, '')}`} 
+                    className="text-lg text-[#70308c] hover:underline mb-2"
+                  >
+                    {point.value}
+                  </a>
+                ) : (
+                  <p className="text-lg text-[#040404] mb-2">
+                    {point.value}
+                  </p>
+                )}
+                <p className="text-gray-600 text-sm">
+                  {point.description}
+                </p>
               </div>
             </motion.div>
-          </motion.div>
-
-          {/* Contact Form */}
-          <motion.div 
-            variants={itemVariants}
-            className="bg-white rounded-xl shadow-2xl p-8"
-          >
-            <h3 className="text-2xl font-bold mb-6 text-gray-800">Send Us a Message</h3>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-colors"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-colors"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={5}
-                  value={formData.message}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-colors"
-                  required
-                ></textarea>
-              </div>
-              <motion.button
-                type="submit"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full py-3 px-6 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-colors shadow-md"
-              >
-                Send Message
-              </motion.button>
-            </form>
-          </motion.div>
+          ))}
         </div>
+
+        {/* Social Media */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="bg-gradient-to-br from-[#70308c] to-[#7bbf42] p-8 rounded-2xl shadow-xl"
+        >
+          <h3 className="text-2xl font-bold text-white mb-6 text-center">
+            Follow Us
+          </h3>
+          <div className="flex flex-wrap justify-center gap-6">
+            {data.socialMedia?.map((social, index) => (
+              <motion.a
+                key={index}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -5, scale: 1.1 }}
+                className="bg-white/20 backdrop-blur-sm w-14 h-14 rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-300"
+              >
+                {getIcon(social.icon)}
+                <span className="sr-only">{social.platform}</span>
+              </motion.a>
+            ))}
+          </div>
+        </motion.div>
       </div>
-    </motion.section>
+    </section>
   );
 };
 
-export default Contact2;
+export default ContactInfo;

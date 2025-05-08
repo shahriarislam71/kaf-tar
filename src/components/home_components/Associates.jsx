@@ -1,41 +1,36 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useAnimation, useInView } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons';
-import { Divider } from 'antd';
-
-// Enhanced color scheme with better contrast
-const colors = {
-  primary: '#38a169',       // Vibrant green
-  primaryLight: '#9ae6b4',  // Light green
-  primaryDark: '#2f855a',   // Dark green
-  secondary: '#f6e05e',     // Yellow
-  secondaryHover: '#ecc94b', // Darker yellow
-  accent: '#2d3748',        // Dark gray/black
-  text: '#2d3748',          // Dark gray/black
-  lightText: '#f7fafc',     // Very light gray/white
-  border: '#e2e8f0',        // Light gray
-  background: '#ffffff',    // Pure white
-  overlay: 'rgba(255,255,255,0.9)' // For text readability
-};
+import { faExternalLinkAlt, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 
 const Associates = () => {
+  // Brand colors
+  const colors = {
+    white: '#ffffff',
+    primary: '#7bbf42',
+    primaryLight: '#a3d177',
+    primaryDark: '#5a9e2d',
+    secondary: '#f9b414',
+    secondaryLight: '#fbc740',
+    tertiary: '#040404',
+    lightBg: '#f8faf7'
+  };
+
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const apiUrl = import.meta.env.VITE_API_URL;
-  const containerRef = useRef(null);
-  const isInView = useInView(containerRef, { once: false, amount: 0.1 });
   const controls = useAnimation();
   const associatesContainerRef = useRef(null);
+  const containerRef = useRef(null);
 
-  // Infinite scroll animation
+  // Enhanced infinite scroll animation
   useEffect(() => {
     if (!data?.associates?.length) return;
 
     const container = associatesContainerRef.current;
     if (!container) return;
 
-    const duration = data.associates.length * 5;
+    const duration = data.associates.length * 7;
 
     const animate = async () => {
       await controls.start({
@@ -51,7 +46,6 @@ const Associates = () => {
 
     animate();
 
-    // Pause on hover
     const handleMouseEnter = () => controls.stop();
     const handleMouseLeave = () => animate();
 
@@ -73,34 +67,39 @@ const Associates = () => {
         setData(jsonData);
       } catch (error) {
         console.error("Error fetching associates data:", error);
-        // Fallback to demo data
         setData({
-          title: "OUR GLOBAL OFFICES",
+          title: "OUR TRUSTED PARTNERS",
+          subtitle: "Collaborating with industry leaders worldwide",
           associates: [
             {
-              logo: "https://via.placeholder.com/150x80?text=Stephhr",
+              logo: "https://via.placeholder.com/150x80?text=GreenBuild",
               link: "#",
-              name: "Stephhr"
+              name: "GreenBuild Solutions",
+              location: "New York, USA"
             },
             {
-              logo: "https://via.placeholder.com/150x80?text=JG+Healthcare",
+              logo: "https://via.placeholder.com/150x80?text=EcoConstruct",
               link: "#",
-              name: "JG Healthcare"
+              name: "EcoConstruct",
+              location: "London, UK"
             },
             {
-              logo: "https://via.placeholder.com/150x80?text=Bitsch",
+              logo: "https://via.placeholder.com/150x80?text=Sustainable",
               link: "#",
-              name: "Bitsch"
+              name: "Sustainable Designs",
+              location: "Berlin, Germany"
             },
             {
-              logo: "https://via.placeholder.com/150x80?text=Global+HR",
+              logo: "https://via.placeholder.com/150x80?text=UrbanDev",
               link: "#",
-              name: "Global HR"
+              name: "Urban Developers",
+              location: "Tokyo, Japan"
             },
             {
-              logo: "https://via.placeholder.com/150x80?text=Talent+Solutions",
+              logo: "https://via.placeholder.com/150x80?text=ModernStruct",
               link: "#",
-              name: "Talent Solutions"
+              name: "Modern Structures",
+              location: "Sydney, Australia"
             }
           ]
         });
@@ -112,10 +111,22 @@ const Associates = () => {
     fetchData();
   }, [apiUrl]);
 
-  if (loading || !data) {
+  if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[200px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+      <div className="flex justify-center items-center min-h-[300px]">
+        <motion.div
+          animate={{ 
+            rotate: 360,
+            scale: [1, 1.2, 1]
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 1.5,
+            ease: 'linear'
+          }}
+          className="rounded-full h-12 w-12 border-t-4 border-b-4"
+          style={{ borderColor: colors.primary }}
+        ></motion.div>
       </div>
     );
   }
@@ -123,111 +134,106 @@ const Associates = () => {
   return (
     <section 
       ref={containerRef}
-      className="py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
-      style={{ backgroundColor: colors.background }}
+      className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
+      style={{ backgroundColor: colors.lightBg }}
     >
-      {/* Background pattern for visual interest */}
-      <div className="absolute inset-0 opacity-5 z-0">
-        <div className="absolute inset-0 bg-gradient-to-r from-green-100 to-yellow-100"></div>
+      {/* Decorative elements */}
+      <div className="absolute inset-0 overflow-hidden opacity-10">
+        <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full" 
+             style={{ backgroundColor: colors.primary }}></div>
+        <div className="absolute -left-10 -bottom-10 w-96 h-96 rounded-full" 
+             style={{ backgroundColor: colors.secondary }}></div>
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Header - Now with better visibility */}
+        {/* Header - Always visible with initial animation */}
         <motion.div 
-          className="text-center mb-12 relative"
+          className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { 
-            opacity: 1, 
-            y: 0,
-            transition: { duration: 0.6 }
-          } : {}}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
         >
-          <div className="inline-block px-8 py-2 rounded-full mb-4" style={{ backgroundColor: colors.primaryLight }}>
-            <h2 
-              className="text-4xl font-bold"
-              style={{ 
-                color: colors.primaryDark,
-                textShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                lineHeight: '1.2'
-              }}
-            >
-              {data.title}
-            </h2>
-          </div>
-          <Divider 
-            style={{ 
-              borderColor: colors.primaryDark,
-              width: '100px',
-              margin: '0 auto',
-              borderWidth: '2px',
-              backgroundColor: colors.primaryDark
-            }}
-          />
+          <h2 
+            className="text-4xl md:text-5xl font-bold mb-4"
+            style={{ color: colors.tertiary }}
+          >
+            {data.title}
+          </h2>
+          {data.subtitle && (
+            <p className="text-lg md:text-xl mb-6" style={{ color: colors.primaryDark }}>
+              {data.subtitle}
+            </p>
+          )}
+          <motion.div 
+            className="w-24 h-1.5 mx-auto rounded-full"
+            style={{ backgroundColor: colors.secondary }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+          ></motion.div>
         </motion.div>
 
-        {/* Associates Logos - Infinite Scroller */}
+        {/* Partners Marquee */}
         <div 
           ref={associatesContainerRef}
           className="relative overflow-hidden py-8"
           style={{
-            maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
-            zIndex: 1,
-            margin: '0 -2rem' // Allow logos to bleed to edges
+            maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
           }}
         >
           <motion.div
-            className="flex items-center"
+            className="flex items-stretch"
             animate={controls}
             style={{ width: 'max-content' }}
           >
-            {/* Double the array to create seamless loop */}
-            {[...data.associates, ...data.associates].map((associate, index) => (
+            {[...data.associates, ...data.associates].map((partner, index) => (
               <motion.div
-                key={`${associate.link}-${index}`}
-                className="px-6 flex flex-col items-center"
-                whileHover={{ scale: 1.05 }}
+                key={`${partner.link}-${index}`}
+                className="px-4 sm:px-6 flex"
+                whileHover={{ scale: 1.03 }}
                 transition={{ type: 'spring', stiffness: 300 }}
               >
                 <a 
-                  href={associate.link} 
+                  href={partner.link} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group relative block"
+                  className="group relative block w-full"
                 >
                   <div 
-                    className="p-6 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl"
+                    className="h-full p-6 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg flex flex-col"
                     style={{ 
-                      backgroundColor: colors.background,
-                      border: `1px solid ${colors.border}`,
-                      minWidth: '200px',
-                      height: '140px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center'
+                      backgroundColor: colors.white,
+                      border: `2px solid ${colors.primary}20`,
+                      minWidth: '260px'
                     }}
                   >
-                    <img 
-                      src={associate.logo} 
-                      alt={`${associate.name} logo`}
-                      className="h-14 object-contain mb-3 transition-all duration-300 group-hover:filter-none"
-                      style={{ filter: 'grayscale(100%) opacity(0.8)' }}
-                    />
-                    <p 
-                      className="text-md font-medium mt-2 text-center"
-                      style={{ 
-                        color: colors.accent,
-                        transition: 'color 0.3s ease'
-                      }}
+                    <div className="flex-grow flex items-center justify-center mb-4">
+                      <img 
+                        src={partner.logo} 
+                        alt={`${partner.name} logo`}
+                        className="max-h-16 object-contain transition-all duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="text-center">
+                      <h3 
+                        className="text-lg font-bold mb-1 transition-colors duration-300"
+                        style={{ color: colors.tertiary }}
+                      >
+                        {partner.name}
+                      </h3>
+                      {partner.location && (
+                        <div className="flex items-center justify-center text-sm" style={{ color: colors.primaryDark }}>
+                          <FontAwesomeIcon icon={faLocationDot} className="mr-1" />
+                          <span>{partner.location}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div 
+                      className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300"
+                      style={{ color: colors.primary }}
                     >
-                      {associate.name}
-                    </p>
-                  </div>
-                  <div 
-                    className="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300"
-                    style={{ color: colors.primary }}
-                  >
-                    <FontAwesomeIcon icon={faExternalLinkAlt} size="sm" />
+                      <FontAwesomeIcon icon={faExternalLinkAlt} size="xs" />
+                    </div>
                   </div>
                 </a>
               </motion.div>
@@ -235,34 +241,34 @@ const Associates = () => {
           </motion.div>
         </div>
 
-        {/* CTA Button - More prominent */}
+        {/* CTA Button - Always visible with initial animation */}
         <motion.div 
           className="text-center mt-16"
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { 
-            opacity: 1, 
-            y: 0,
-            transition: { delay: 0.3, duration: 0.6 }
-          } : {}}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
         >
           <motion.button
-            className="px-10 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="px-12 py-4 rounded-full font-bold text-lg relative overflow-hidden group"
             style={{
-              background: `linear-gradient(135deg, ${colors.secondary}, ${colors.primaryLight})`,
-              color: colors.accent,
-              boxShadow: `0 4px 0 ${colors.primaryDark}`
+              background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+              color: colors.white,
+              boxShadow: `0 4px 15px ${colors.primary}40`
             }}
             whileHover={{ 
-              scale: 1.05,
-              boxShadow: `0 6px 0 ${colors.primaryDark}`
+              y: -2,
+              scale: 1.02,
+              boxShadow: `0 6px 20px ${colors.primary}60`
             }}
             whileTap={{ 
               scale: 0.98,
-              boxShadow: `0 2px 0 ${colors.primaryDark}`
+              boxShadow: `0 2px 10px ${colors.primary}30`
             }}
           >
-            Become a Partner
-            <span className="ml-2">→</span>
+            <span className="relative z-10">Join Our Network</span>
+            <span 
+              className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"
+            ></span>
           </motion.button>
         </motion.div>
       </div>

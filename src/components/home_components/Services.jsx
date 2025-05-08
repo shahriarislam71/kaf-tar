@@ -1,285 +1,189 @@
-import { useState, useEffect } from 'react';
-import { message, Card, Row, Col, Typography, Button, Divider } from 'antd';
-import { RightOutlined, LeftOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
-const { Title, Text } = Typography;
+const apiUrl = import.meta.env.VITE_API_URL;
 
-const ServiceExplorer = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
+const ServicesSection = () => {
   const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const apiUrl = import.meta.env.VITE_API_URL;
+  const [categories, setCategories] = useState([]);
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch services data
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        setLoading(true);
         const response = await fetch(`${apiUrl}/home/services/`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch services');
-        }
-        
+        if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        setServices(data.services || []);
-      } catch (error) {
-        console.error('Error fetching services:', error);
-        message.warning('Using demo services data');
-        setServices([
-          {
-            "title": "Residential Construction",
-            "icon": "🏠",
-            "description": "Custom home building and remodeling services tailored to your unique vision and lifestyle needs.",
-            "features": [
-              "Custom home design",
-              "Energy-efficient construction",
-              "Luxury finishes"
-            ]
-          },
-          {
-            "title": "Commercial Construction",
-            "icon": "🏢",
-            "description": "Professional commercial building services for offices, retail spaces, and industrial facilities.",
-            "features": [
-              "Project management",
-              "Timely delivery",
-              "Commercial zoning compliance"
-            ]
-          },
-          {
-            "title": "Renovation Services",
-            "icon": "🛠️",
-            "description": "Transform your existing space with our comprehensive renovation solutions.",
-            "features": [
-              "Kitchen remodeling",
-              "Bathroom upgrades",
-              "Structural improvements"
-            ]
-          },
-          {
-            "title": "Construction Management",
-            "icon": "📊",
-            "description": "Professional oversight of your construction project from start to finish.",
-            "features": [
-              "Budget control",
-              "Schedule management",
-              "Quality assurance"
-            ]
-          }
-        ]);
+        setServices(data.services);
+        setCategories(data.categories);
+      } catch (err) {
+        setError(err.message);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchServices();
-  }, [apiUrl]);
+  }, []);
 
-  const nextService = () => {
-    setActiveIndex((prevIndex) => 
-      prevIndex === services.length - 1 ? 0 : prevIndex + 1
-    );
+  // Corrected filtering logic
+  const filteredServices = activeCategory === 'all' 
+    ? services 
+    : services.filter(service => service.category === activeCategory);
+
+  // Animation variants
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
   };
 
-  const prevService = () => {
-    setActiveIndex((prevIndex) => 
-      prevIndex === 0 ? services.length - 1 : prevIndex - 1
-    );
+  const item = {
+    hidden: { y: 20, opacity: 0 },
+    show: { y: 0, opacity: 1 }
   };
 
-  if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px' }}>Loading services...</div>;
-  }
+  if (isLoading) return (
+    <div className="flex justify-center py-20">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#7bbf42]"></div>
+    </div>
+  );
 
-  if (!services.length) {
-    return <div style={{ textAlign: 'center', padding: '40px' }}>No services available</div>;
-  }
-
-  const activeService = services[activeIndex];
+  if (error) return (
+    <div className="text-center py-10 text-red-500">
+      Error loading services: {error}
+    </div>
+  );
 
   return (
-    <div style={{ 
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%)',
-      padding: '40px 20px',
-      borderRadius: '12px',
-      margin: '20px 0'
-    }}>
-      <Title level={2} style={{ 
-        textAlign: 'center', 
-        marginBottom: '40px',
-        color: '#2c3e50',
-        fontWeight: '600'
-      }}>
-        Our Construction Services
-      </Title>
-      
-      <Row justify="center" gutter={[24, 24]}>
-        <Col xs={24} md={18} lg={16}>
-          <Card
-            hoverable
-            style={{
-              borderRadius: '16px',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)',
-              border: 'none',
-              overflow: 'hidden'
-            }}
-            bodyStyle={{ padding: '32px' }}
+    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+      <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-4xl font-bold text-[#040404] mb-4">
+            Our <span className="text-[#7bbf42]">Services</span>
+          </h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Comprehensive facility management solutions tailored to your needs
+          </p>
+        </motion.div>
+
+        {/* Category Filters - Updated with better state management */}
+        <motion.div 
+          className="flex flex-wrap justify-center gap-3 mb-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <button
+            onClick={() => setActiveCategory('all')}
+            className={`px-6 py-2 rounded-full font-medium transition-all ${
+              activeCategory === 'all' 
+                ? 'bg-[#7bbf42] text-white shadow-lg shadow-[#7bbf42]/30' 
+                : 'bg-[#f9b414] text-[#040404] hover:bg-[#f9b414]/90'
+            }`}
           >
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center'
-            }}>
-              <div style={{
-                fontSize: '48px',
-                marginBottom: '20px',
-                background: 'linear-gradient(45deg, #27ae60, #2ecc71)',
-                width: '80px',
-                height: '80px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white'
-              }}>
-                {activeService.icon}
-              </div>
-              
-              <Title level={3} style={{ 
-                color: '#2c3e50',
-                marginBottom: '16px'
-              }}>
-                {activeService.title}
-              </Title>
-              
-              <Text style={{ 
-                fontSize: '16px',
-                color: '#7f8c8d',
-                marginBottom: '24px',
-                maxWidth: '600px'
-              }}>
-                {activeService.description}
-              </Text>
-              
-              <Divider style={{ borderColor: '#e0e0e0' }} />
-              
-              <div style={{ 
-                width: '100%',
-                textAlign: 'left',
-                marginBottom: '24px'
-              }}>
-                <Title level={4} style={{ 
-                  color: '#27ae60',
-                  marginBottom: '16px'
-                }}>
-                  Key Features:
-                </Title>
-                <ul style={{ 
-                  paddingLeft: '20px',
-                  listStyleType: 'none'
-                }}>
-                  {activeService.features.map((feature, index) => (
-                    <li key={index} style={{ 
-                      marginBottom: '8px',
-                      position: 'relative',
-                      paddingLeft: '24px',
-                      color: '#34495e'
-                    }}>
-                      <span style={{
-                        position: 'absolute',
-                        left: 0,
-                        color: '#27ae60'
-                      }}>✓</span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div style={{ 
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '16px',
-                marginTop: '24px'
-              }}>
-                <Button 
-                  shape="circle" 
-                  icon={<LeftOutlined />} 
-                  onClick={prevService}
-                  style={{
-                    background: '#f39c12',
-                    color: 'white',
-                    border: 'none',
-                    width: '40px',
-                    height: '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                />
-                
-                <Button 
-                  type="primary" 
-                  size="large"
-                  style={{
-                    background: 'linear-gradient(45deg, #27ae60, #2ecc71)',
-                    border: 'none',
-                    borderRadius: '24px',
-                    padding: '0 32px',
-                    height: '40px',
-                    fontWeight: '500',
-                    boxShadow: '0 4px 12px rgba(39, 174, 96, 0.3)'
-                  }}
-                >
-                  Learn More
-                </Button>
-                
-                <Button 
-                  shape="circle" 
-                  icon={<RightOutlined />} 
-                  onClick={nextService}
-                  style={{
-                    background: '#f39c12',
-                    color: 'white',
-                    border: 'none',
-                    width: '40px',
-                    height: '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                />
-              </div>
-            </div>
-          </Card>
-        </Col>
-      </Row>
-      
-      <div style={{ 
-        display: 'flex',
-        justifyContent: 'center',
-        marginTop: '24px',
-        gap: '8px'
-      }}>
-        {services.map((_, index) => (
-          <div 
-            key={index}
-            onClick={() => setActiveIndex(index)}
-            style={{
-              width: '12px',
-              height: '12px',
-              borderRadius: '50%',
-              background: index === activeIndex ? '#27ae60' : '#bdc3c7',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-          />
-        ))}
+            All Services
+          </button>
+          
+          {categories.map(category => (
+            <button
+              key={category.id}
+              onClick={() => setActiveCategory(category.slug)}
+              className={`px-6 py-2 rounded-full font-medium transition-all ${
+                activeCategory === category.slug 
+                  ? 'bg-[#70308c] text-white shadow-lg shadow-[#70308c]/30' 
+                  : 'bg-gray-100 text-[#040404] hover:bg-gray-200'
+              }`}
+            >
+              {category.name}
+            </button>
+          ))}
+        </motion.div>
+
+        {/* Services Grid - Now properly shows all services when "All" is selected */}
+        {filteredServices.length > 0 ? (
+          <motion.div
+            variants={container}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+            key={activeCategory} // This ensures re-animation when category changes
+          >
+            {filteredServices.map(service => (
+              <motion.div 
+                key={service.id}
+                variants={item}
+                whileHover={{ y: -5 }}
+                className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300"
+              >
+                <div className="p-6">
+                  <div 
+                    className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 mx-auto`}
+                    style={{
+                      background: `linear-gradient(135deg, ${
+                        service.category === 'hard' ? '#7bbf42' : 
+                        service.category === 'soft' ? '#f9b414' : 
+                        service.category === 'specialized' ? '#70308c' : '#040404'
+                      }, ${
+                        service.category === 'hard' ? '#7bbf42aa' : 
+                        service.category === 'soft' ? '#f9b414aa' : 
+                        service.category === 'specialized' ? '#70308caa' : '#040404aa'
+                      })`
+                    }}
+                  >
+                    <span className="text-white">{service.icon}</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-center text-[#040404] mb-2">
+                    {service.title}
+                  </h3>
+                  <p className="text-gray-600 text-center">{service.description}</p>
+                </div>
+                <div className="px-6 pb-4 text-center">
+                  <button className="text-[#7bbf42] font-semibold hover:text-[#5a9a32] transition-colors">
+                    Learn more →
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <div className="text-center py-10 text-gray-500">
+            No services found in this category
+          </div>
+        )}
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          viewport={{ once: true }}
+          className="mt-16 text-center"
+        >
+          <a
+            href="/services"
+            className="inline-block px-8 py-3 bg-gradient-to-r from-[#7bbf42] to-[#f9b414] text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
+          >
+            View All Services
+          </a>
+        </motion.div>
       </div>
-    </div>
+    </section>
   );
 };
 
-export default ServiceExplorer;
+export default ServicesSection;

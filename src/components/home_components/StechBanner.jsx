@@ -15,7 +15,7 @@ const StechBanner = () => {
 
   <div className="relative z-20 mb-4 sm:mb-8 lg:mb-0 mx-20">
     <h2 className="text-center text-xl font-extrabold text-white sm:text-2xl lg:text-left lg:text-4xl">
-      A Concern of <span className="text-green-300">Stech Group</span>
+      A Concern of <span className="text-green-300">KAF TAR</span>
     </h2>
   </div>
 

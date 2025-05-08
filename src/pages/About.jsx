@@ -21,19 +21,19 @@ const About = () => {
       </div>
      
       <div id="about2" >
-        {/* <About2  /> */}
+        <About2  />
       </div>
       <div id ="values"> 
-        {/* <CoreValues />  */}
+        <CoreValues /> 
       </div>
       <div id="message"  >
-        <Message  />
+        {/* <Message  /> */}
       </div>
       <div id="team"  >
-        <Team  />
+        {/* <Team  /> */}
       </div>
       <div id="why-us"  >
-        <WhyUs></WhyUs>
+        {/* <WhyUs></WhyUs> */}
       </div>
       {/* <div id="faq" >
         <FAQ  />

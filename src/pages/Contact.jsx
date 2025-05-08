@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import Contact1 from '../components/contact_components/Contact1';
 import Contact2 from '../components/contact_components/Contact2';
 import StechBanner from '../components/home_components/StechBanner';
+import ServiceCard from '../components/service_components/ServiceCard';
 
 const Contact = () => {
   const contact2Ref = useRef(null); // Create a ref for Contact2

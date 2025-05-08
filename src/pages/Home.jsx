@@ -6,11 +6,16 @@ import OurClients from '../components/home_components/OurClients';
 import IndustriesWeServe from '../components/home_components/IndustriesWeServe';
 import Statistics from '../components/home_components/Statistics';
 import Hero from '../components/home_components/Hero';
+import ContactCTA from '../components/home_components/Contact';
 
 
 import Associates from '../components/home_components/Associates';
 import Timeline from '../components/home_components/MobilizationTimeline';
 import AboutPreview from '../components/home_components/AboutPreview';
+import ProjectPreview from '../components/home_components/Projects';
+import Testimonials from '../components/home_components/Testimonials';
+import ClientLogos from '../components/home_components/ClientLogos';
+import Contact from '../components/home_components/Contact';
 
 const Home = () => {
   // const { getDivider, availableShapes } = useOutletContext(); // Fetch shapes dynamically
@@ -44,54 +49,70 @@ const Home = () => {
         <Hero />
       </div>
       <div>
-        <AboutPreview></AboutPreview>
+        {/* <AboutPreview></AboutPreview> */}
       </div>
       <div id="services">
         <Services />
       </div>
       
 
+      <div id="why-us">
+        <WhyUs />
+      </div>
+
+      <div>
+        <ClientLogos></ClientLogos>
+      </div>
+
       <div id="stech-banner">
         {/* <StechBanner /> */}
       </div>
       <div id="cards">
-        <Cards />
+        {/* <Cards /> */}
+      </div>
+      {/* <div>
+        <ProjectPreview></ProjectPreview>
       </div>
 
+      <div>
+        <Testimonials></Testimonials>
+      </div>
+      <div id="our-clients">
+        <OurClients />
+      </div> */}
+      {/* <div>
+        <ContactCTA></ContactCTA>
+      </div> */}
       
 
       <div id="statistics">
-        <Statistics />
+        {/* <Statistics /> */}
       </div>
 
       {/* <div id="grid-cards">
         <GridCards />
       </div> */}
 
-      <div id="why-us">
-        {/* <WhyUs /> */}
-      </div>
+      
       <div id="timeline">
-      <Timeline />
+      {/* <Timeline /> */}
 
     </div>
 
-      <div id="our-clients">
-        <OurClients />
-      </div>
+      
 
       
       <div id="news">
         {/* <IndustriesWeServe /> */}
       </div>
 
-      <div id="associates">
+      {/* <div id="associates">
         <Associates />
-      </div>
-{/* 
-      <div id="contact">
-        <Contact />
       </div> */}
+
+      <div id="contact">
+        <Contact></Contact>
+      </div>
 
       {/* <div id="location">
         <Location />

@@ -18,6 +18,11 @@ import WorkerRegistrationManagement from "./components/FORM_Components/WorkerReg
 import DemandSubmissionManagement from "./components/FORM_Components/DemandSubmissionManagement";
 import ImageUpload from "./pages/ImageUpload";
 import ContactUs from "./pages/ContactUs";
+import Service from "./pages/Service";
+import Project from "./pages/Project";
+import QuoteForm from "./pages/QuoteForm";
+import Sustainability from "./pages/Sustainability";
+import CareersPage from "./pages/Career";
 
 // Lazy-loaded pages
 const Home = React.lazy(() => import("./pages/Home"));
@@ -94,6 +99,41 @@ const App = () => {
           ),
         },
         {
+          path: "sustainability",
+          element: (
+            <Suspense fallback={<div>Loading...</div>}>
+              <Sustainability></Sustainability>
+            </Suspense>
+          ),
+        },
+        
+        {
+          path: "career",
+          element: (
+            <Suspense fallback={<div>Loading...</div>}>
+              <CareersPage></CareersPage>
+            </Suspense>
+          ),
+        },
+
+        {
+          path: "service",
+          element: (
+            <Suspense fallback={<div>Loading...</div>}>
+              <Service></Service>
+            </Suspense>
+          ),
+        },
+        {
+          path: "project",
+          element: (
+            <Suspense fallback={<div>Loading...</div>}>
+              <Project></Project>
+            </Suspense>
+          ),
+        },
+
+        {
           path: "contact",
           element: (
             <Suspense fallback={<div>Loading...</div>}>
@@ -114,6 +154,14 @@ const App = () => {
           element: (
             <Suspense fallback={<div>Loading...</div>}>
               <Projects />
+            </Suspense>
+          ),
+        },
+        {
+          path: "quote",
+          element: (
+            <Suspense fallback={<div>Loading...</div>}>
+              <QuoteForm></QuoteForm>
             </Suspense>
           ),
         },
@@ -222,6 +270,7 @@ const App = () => {
             </Suspense>
           ),
         },
+        
         {
           path: "gallery",
           element: (

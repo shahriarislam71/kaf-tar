@@ -43,6 +43,7 @@ const ProjectsEditor = () => {
       <div className='flex flex-col gap-10'>
         <button className="btn btn-primary" onClick={() => setModalOpen(true)}>Projects</button>
         
+        <button className="btn btn-primary" onClick={() => setModalOpen(true)}>ProjectsCard</button>
         {/* Projects Modal */}
         <ProjectsModal
           isOpen={isModalOpen} 

@@ -1,231 +1,215 @@
-import React, { useState } from "react";
-import { FaMapMarkerAlt, FaPhone, FaClock, FaGraduationCap, FaArrowRight } from 'react-icons/fa';
-import { motion } from "framer-motion";
+import { useState, useEffect } from 'react';
+import { FaExpand, FaCalendarAlt, FaMapMarkerAlt, FaHardHat } from 'react-icons/fa';
 
-const TrainingPrograms = () => {
-  const [expandedId, setExpandedId] = useState(null);
+const apiUrl = import.meta.env.VITE_API_URL;
 
-  const programs = [
-    {
-      id: 1,
-      title: "Construction Mastery",
-      tagline: "Build the future with expert skills",
-      description: "Comprehensive training in modern construction techniques using cutting-edge tools and safety protocols. Our 200-hour certification includes hands-on workshops with industry-standard equipment.",
-      imageUrl: "https://images.unsplash.com/photo-1581093450021-4a7360e9a7e8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      location: "Dhaka Central Campus",
-      phone: "+880 1234 567890",
-      schedule: "Mon-Fri: 8AM-6PM | Weekends: 9AM-3PM",
-      highlights: [
-        "10,000 sqft training facility",
-        "OSHA-certified instructors",
-        "Job placement assistance"
-      ],
-      accentColor: "#F15A24"
-    },
-    {
-      id: 2,
-      title: "Heavy Machinery Pro",
-      tagline: "Operate with precision & safety",
-      description: "Master heavy equipment operation on our 5-acre training ground with 50+ machines. Certification includes 250 practice hours and simulator training for complex scenarios.",
-      imageUrl: "https://images.unsplash.com/photo-1581094271901-8022df4466f9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      location: "Chittagong Industrial Zone",
-      phone: "+880 9876 543210",
-      schedule: "Daily: 7AM-7PM",
-      highlights: [
-        "Crane/Excavator/Forklift specialties",
-        "Real-world obstacle courses",
-        "Maintenance basics included"
-      ],
-      accentColor: "#FFC20E"
-    },
-    {
-      id: 3,
-      title: "Electrical Systems",
-      tagline: "Power up your technical skills",
-      description: "From residential wiring to commercial installations, our program combines NEC code training with 150+ hours of hands-on practice in fully equipped labs.",
-      imageUrl: "https://images.unsplash.com/photo-1581093057305-5e0d60e2b53b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      location: "Sylhet Technical Hub",
-      phone: "+880 1122 334455",
-      schedule: "Sun-Thu: 9AM-5PM",
-      highlights: [
-        "Smart home technology training",
-        "Solar installation modules",
-        "Licensing exam prep"
-      ],
-      accentColor: "#00A0DC"
-    },
-    {
-      id: 4,
-      title: "Industrial Safety",
-      tagline: "Protect your team & workplace",
-      description: "Certification programs covering OSHA standards, emergency response, and hazard prevention. Features live fire simulations and virtual reality training scenarios.",
-      imageUrl: "https://images.unsplash.com/photo-1581094271900-7dcc8d475d84?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      location: "Khulna Safety Academy",
-      phone: "+880 5566 778899",
-      schedule: "Mon-Sat: 8AM-4PM",
-      highlights: [
-        "15 specialized training labs",
-        "CPR/First Aid certification",
-        "Multilingual instructors"
-      ],
-      accentColor: "#8A2BE2"
+const ProjectPreview = () => {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [expandedProject, setExpandedProject] = useState(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/projects/`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch projects');
+        }
+        const data = await response.json();
+        setProjects(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  const toggleExpand = (projectId) => {
+    if (expandedProject === projectId) {
+      setExpandedProject(null);
+    } else {
+      setExpandedProject(projectId);
     }
-  ];
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#7bbf42]"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-white">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded max-w-md mx-auto">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-gradient-to-b from-gray-100 to-white min-h-screen py-20 px-6">
-      {/* Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto text-center mb-16"
-      >
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-          Professional Training Programs
-        </h1>
-        <div className="w-24 h-1 bg-orange-500 mx-auto mb-6" />
-        <p className="text-xl text-gray-600">
-          Equal opportunity excellence across all our specialized centers
-        </p>
-      </motion.div>
+    <section className="py-16 bg-white relative overflow-hidden">
+      {/* Decorative elements */}
+      <div className="absolute top-0 left-0 w-32 h-32 bg-[#7bbf42] opacity-10 rounded-full -translate-x-16 -translate-y-16"></div>
+      <div className="absolute bottom-0 right-0 w-64 h-64 bg-[#f9b414] opacity-10 rounded-full translate-x-32 translate-y-32"></div>
+      
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Header with creative design */}
+        <div className="text-center mb-16">
+          <div className="inline-block relative">
+            <h2 className="text-5xl font-bold text-[#040404] mb-4 relative z-10">
+              Our Featured Projects
+            </h2>
+            <div className="absolute bottom-0 left-0 w-full h-4 bg-[#f9b414] opacity-40 -z-0"></div>
+          </div>
+          <p className="text-xl text-[#040404] max-w-3xl mx-auto opacity-90 mt-4">
+            Explore our <span className="font-semibold text-[#7bbf42]">successful constructions</span> that showcase our expertise and <span className="font-semibold text-[#f9b414]">quality craftsmanship</span>
+          </p>
+        </div>
 
-      {/* Programs Grid */}
-      <div className="max-w-7xl mx-auto grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-        {programs.map((program) => (
-          <motion.div
-            key={program.id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            whileHover={{ y: -10 }}
-            className={`relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 ${expandedId === program.id ? 'ring-2' : ''}`}
-            style={{ 
-              maxWidth: '400px',
-              minHeight: '550px',
-              borderTop: `6px solid ${program.accentColor}`,
-              borderColor: expandedId === program.id ? program.accentColor : 'transparent'
-            }}
-          >
-            {/* Program Image */}
-            <div className="h-48 overflow-hidden">
-              <img
-                src={program.imageUrl}
-                alt={program.title}
-                className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-            </div>
-
-            {/* Program Content */}
-            <div className="p-6">
-              <div className="flex items-start mb-4">
-                <div 
-                  className="p-3 rounded-lg mr-4"
-                  style={{ backgroundColor: `${program.accentColor}20` }}
+        {/* Projects grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {projects.map((project) => (
+            <div 
+              key={project.id}
+              className={`bg-white rounded-2xl overflow-hidden shadow-xl transition-all duration-300 ${expandedProject === project.id ? 'md:col-span-2 lg:col-span-2' : 'hover:shadow-2xl hover:-translate-y-2'}`}
+            >
+              {/* Project image with overlay */}
+              <div className="relative h-64 overflow-hidden group">
+                <img 
+                  src={project.mainImage} 
+                  alt={project.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#040404cc] via-transparent to-transparent opacity-90"></div>
+                
+                {/* Project quick info */}
+                <div className="absolute bottom-0 left-0 p-6 w-full">
+                  <h3 className="text-2xl font-bold text-white mb-2">{project.title}</h3>
+                  <div className="flex flex-wrap gap-3">
+                    <span className="flex items-center text-sm text-white">
+                      <FaCalendarAlt className="mr-1 text-[#f9b414]" />
+                      {project.completionDate}
+                    </span>
+                    <span className="flex items-center text-sm text-white">
+                      <FaMapMarkerAlt className="mr-1 text-[#f9b414]" />
+                      {project.location}
+                    </span>
+                    <span className="flex items-center text-sm text-white">
+                      <FaHardHat className="mr-1 text-[#f9b414]" />
+                      {project.type}
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Expand button */}
+                <button 
+                  onClick={() => toggleExpand(project.id)}
+                  className="absolute top-4 right-4 p-3 bg-white rounded-full shadow-lg hover:bg-[#7bbf42] hover:text-white transition-colors"
+                  aria-label="Expand project details"
                 >
-                  <FaGraduationCap 
-                    className="text-xl" 
-                    style={{ color: program.accentColor }} 
-                  />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">{program.title}</h2>
-                  <p className="text-sm text-gray-500">{program.tagline}</p>
-                </div>
+                  <FaExpand className={`transition-transform ${expandedProject === project.id ? 'rotate-180' : ''}`} />
+                </button>
               </div>
-
-              <p className={`text-gray-600 mb-4 ${expandedId === program.id ? '' : 'line-clamp-3'}`}>
-                {program.description}
-              </p>
-
-              {expandedId === program.id && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="mb-4"
-                >
-                  <h3 className="font-semibold text-gray-800 mb-2">Program Highlights:</h3>
-                  <ul className="space-y-2">
-                    {program.highlights.map((item, i) => (
-                      <li key={i} className="flex items-start">
-                        <div 
-                          className="w-5 h-5 rounded-full flex items-center justify-center mt-0.5 mr-2 flex-shrink-0"
-                          style={{ backgroundColor: `${program.accentColor}20` }}
-                        >
-                          <div 
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: program.accentColor }}
-                          />
+              
+              {/* Project details - shown when expanded */}
+              {expandedProject === project.id && (
+                <div className="p-6 animate-fadeIn">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                    <div>
+                      <h4 className="text-lg font-semibold text-[#040404] mb-3 border-b border-[#7bbf42] pb-2">Project Details</h4>
+                      <p className="text-gray-700 mb-4">{project.description}</p>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Client:</span>
+                          <span className="font-medium text-[#040404]">{project.client}</span>
                         </div>
-                        <span className="text-gray-700">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Size:</span>
+                          <span className="font-medium text-[#040404]">{project.size}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Duration:</span>
+                          <span className="font-medium text-[#040404]">{project.duration}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-lg font-semibold text-[#040404] mb-3 border-b border-[#7bbf42] pb-2">Key Features</h4>
+                      <ul className="space-y-2">
+                        {project.features.map((feature, index) => (
+                          <li key={index} className="flex items-start">
+                            <span className="inline-block w-2 h-2 bg-[#7bbf42] rounded-full mt-2 mr-2"></span>
+                            <span className="text-gray-700">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                  
+                  {/* Gallery preview */}
+                  {project.gallery && project.gallery.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-[#040404] mb-3 border-b border-[#7bbf42] pb-2">Gallery</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        {project.gallery.slice(0, 3).map((image, index) => (
+                          <div key={index} className="aspect-square overflow-hidden rounded-lg">
+                            <img 
+                              src={image} 
+                              alt={`${project.title} - ${index + 1}`}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform"
+                            />
+                          </div>
+                        ))}
+                        {project.gallery.length > 3 && (
+                          <div className="aspect-square bg-[#f9b414] bg-opacity-20 rounded-lg flex items-center justify-center">
+                            <span className="text-[#040404] font-medium">+{project.gallery.length - 3} more</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex flex-wrap gap-4 justify-between items-center border-t border-gray-100 pt-4">
+                    <div className="flex items-center space-x-2">
+                      {project.tags.map((tag, index) => (
+                        <span 
+                          key={index}
+                          className="px-3 py-1 rounded-full text-xs font-medium bg-[#7bbf42] bg-opacity-10 text-[#040404]"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <button className="px-6 py-2 bg-[#7bbf42] text-white font-medium rounded-lg hover:bg-[#6aa738] transition-colors shadow-md">
+                      View Full Case Study
+                    </button>
+                  </div>
+                </div>
               )}
-
-              <div className="absolute bottom-6 left-6 right-6">
-                <div className="flex flex-wrap gap-3 mb-4">
-                  <motion.button
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    className="px-4 py-2 rounded-lg text-sm font-medium flex items-center"
-                    style={{ 
-                      backgroundColor: program.accentColor,
-                      color: 'white'
-                    }}
-                  >
-                    Enroll Now <FaArrowRight className="ml-2" />
-                  </motion.button>
-                  <button
-                    onClick={() => setExpandedId(expandedId === program.id ? null : program.id)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium border"
-                    style={{ 
-                      borderColor: program.accentColor,
-                      color: program.accentColor
-                    }}
-                  >
-                    {expandedId === program.id ? 'Less Info' : 'More Info'}
-                  </button>
-                </div>
-
-                <div className="border-t border-gray-200 pt-3">
-                  <div className="flex items-center text-xs text-gray-500 mb-1">
-                    <FaMapMarkerAlt className="mr-2" />
-                    <span>{program.location}</span>
-                  </div>
-                  <div className="flex items-center text-xs text-gray-500">
-                    <FaClock className="mr-2" />
-                    <span>{program.schedule}</span>
-                  </div>
-                </div>
-              </div>
             </div>
-          </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* CTA */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        className="text-center mt-20"
-      >
-        <h3 className="text-2xl font-bold text-gray-900 mb-4">
-          Ready to advance your career?
-        </h3>
-        <motion.a
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          href="#"
-          className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-lg shadow-lg"
-        >
-          Compare All Programs <FaArrowRight className="ml-3" />
-        </motion.a>
-      </motion.div>
-    </div>
+        {/* CTA Section */}
+        <div className="mt-20 text-center">
+          <div className="inline-block bg-gradient-to-r from-[#7bbf42] to-[#f9b414] p-1 rounded-full shadow-lg">
+            <button className="px-8 py-3 bg-white text-[#040404] font-bold rounded-full hover:bg-opacity-90 transition-all">
+              View All Projects
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 };
 
-export default TrainingPrograms;
+export default ProjectPreview;

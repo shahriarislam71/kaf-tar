@@ -1,207 +1,155 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
-const COLORS = {
-  primary: "#F15A24",
-  primaryLight: "#FF7A45",
-  secondary: "#FFC20E",
-  secondaryLight: "#FFD95E",
-  lightGray: "#F8F8F8",
-  darkGray: "#2D2D2D",
-  white: "#FFFFFF",
-  black: "#000000"
-};
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const About2 = () => {
-  const [about2, setAbout2] = useState({
-    "title": "Empowering Global Workforce from Bangladesh",
-    "description": "At Stech HR, we go beyond recruitment. We connect skilled Bangladeshi talent to global opportunities, driving growth through precision hiring and people-first strategies.",
-    "keyPoints": [
-      {
-        "icon": "🤝",
-        "title": "Trusted Recruitment Partner",
-        "description": "Reliable manpower solutions tailored for international employers."
-      },
-      {
-        "icon": "🌍",
-        "title": "Skilled Workforce Export",
-        "description": "Deploying trained, certified professionals across the Middle East, Europe, and Asia."
-      },
-      {
-        "icon": "📊",
-        "title": "Transparent Hiring Process",
-        "description": "Data-driven screening and compliance for ethical recruitment."
-      }
-    ],
-    "buttonLabel": "Partner with Stech HR",
-    "buttonLink": "/about",
-    "bgColor": "darkgray",
-    "textColor": "white"
-  }
-  );
-
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${apiUrl}/about/about2`);
-        const data2 = await response.json();
-        setAbout2(data2);
+        const response = await fetch(`${apiUrl}/about/about2/`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const jsonData = await response.json();
+        setData(jsonData);
       } catch (err) {
-        setError('Failed to fetch data');
-        console.error(err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [apiUrl]);
+  }, []);
 
-  return (
-    <div 
-      className="min-h-screen flex items-center justify-center py-16 relative overflow-hidden text-justify"
-      style={{ 
-        backgroundColor:  COLORS.darkGray,
-        color: COLORS.white
-      }}
-    >
-      {/* Geometric Background Overlay */}
-      <div 
-        className="absolute inset-0 opacity-20 pointer-events-none"
-        style={{
-          backgroundImage: `
-            linear-gradient(135deg, 
-              ${COLORS.primary}20, 
-              ${COLORS.secondary}20),
-            repeating-linear-gradient(
-              45deg, 
-              transparent, 
-              transparent 50px, 
-              ${COLORS.primaryLight}10 50px, 
-              ${COLORS.primaryLight}10 100px
-            )
-          `,
-          mixBlendMode: 'overlay'
-        }}
-      />
-
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-          {/* Content Section with Innovative Presentation */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="space-y-8"
-          >
-            <div 
-              className="text-5xl font-bold mb-8 relative inline-block"
-              style={{ color: COLORS.primary }}
-            >
-              {about2.title}
-              <div 
-                className="absolute -bottom-2 left-0 h-2 w-1/2"
-                style={{ 
-                  background: `linear-gradient(to right, ${COLORS.primary}, ${COLORS.secondary})`,
-                  borderRadius: '10px'
-                }}
-              />
+  if (isLoading) return (
+    <div className="py-20 bg-gradient-to-br from-white to-[#7bbf42]/10">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="animate-pulse space-y-12">
+          <div className="h-10 bg-gray-200 rounded w-1/4 mx-auto"></div>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
             </div>
-            
-            <p 
-              className="text-xl mb-8 leading-relaxed"
-              style={{ color: COLORS.lightGray }}
-            >
-              {about2.description}
-            </p>
-
-            {/* Key Points with Dynamic Interaction */}
-            <div className="space-y-6">
-              {about2.keyPoints.map((point, index) => (
-                <motion.div
-                  key={index}
-                  className="flex items-center space-x-6 p-6 rounded-2xl transition-all duration-300"
-                  style={{
-                    background: `linear-gradient(145deg, ${COLORS.primaryLight}20, ${COLORS.secondary}20)`,
-                    border: `2px solid ${COLORS.primary}40`
-                  }}
-                  whileHover={{ 
-                    scale: 1.05,
-                    boxShadow: `0 10px 25px -5px ${COLORS.primary}40`
-                  }}
-                >
-                  <div 
-                    className="text-4xl"
-                    style={{ 
-                      textShadow: `2px 2px 4px ${COLORS.primary}40`
-                    }}
-                  >
-                    {point.icon}
-                  </div>
-                  <div>
-                    <h3 
-                      className="text-xl font-bold mb-2"
-                      style={{ color: COLORS.primary }}
-                    >
-                      {point.title}
-                    </h3>
-                    <p 
-                      className="text-sm"
-                      style={{ color: COLORS.lightGray }}
-                    >
-                      {point.description}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
+            <div className="space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded w-4/5"></div>
             </div>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="mt-8 px-10 py-4 rounded-full text-lg font-bold shadow-2xl transform transition-all duration-300 hover:rotate-3"
-              style={{
-                background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary})`,
-                color: COLORS.white,
-                boxShadow: `0 15px 30px -10px ${COLORS.primary}60`
-              }}
-              onClick={() => window.location.href = about2.buttonLink}
-            >
-              {about2.buttonLabel}
-            </motion.button>
-          </motion.div>
-
-          {/* Interactive 3D-like Image Section */}
-          <motion.div 
-            className="relative group"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div 
-              className="absolute -inset-4 bg-gradient-to-r from-primary to-secondary rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition duration-500"
-            />
-            <div 
-              className="relative rounded-3xl overflow-hidden shadow-2xl transform transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3"
-              style={{ 
-                border: `4px solid ${COLORS.primary}`,
-                boxShadow: `0 25px 50px -12px ${COLORS.primary}40`
-              }}
-            >
-              <img 
-                src="https://stechhr.com.bd/wp-content/uploads/2022/05/construction-worker-truss-installation.jpeg" 
-                alt="Innovative Workforce Solutions" 
-                className="w-full h-full object-cover"
-              />
-              <div 
-                className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-70 transition duration-500"
-              />
-            </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>
+  );
+
+  if (error) return (
+    <div className="py-16 bg-white text-center text-red-500">
+      Error loading Vision & Mission: {error}
+    </div>
+  );
+
+  if (!data) return null;
+
+  return (
+    <section className="py-12 bg-gradient-to-br from-white to-[#7bbf42]/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl font-bold text-[#040404]">
+            Our <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#7bbf42] to-[#f9b414]">Core</span>
+          </h2>
+          <div className="w-20 h-1 bg-gradient-to-r from-[#7bbf42] to-[#f9b414] mx-auto mt-4"></div>
+        </motion.div>
+
+        {/* Vision & Mission Cards */}
+        <div className="grid md:grid-cols-2 gap-12 mb-16">
+          {/* Vision Card */}
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-2xl shadow-xl overflow-hidden border border-[#7bbf42]/20 hover:shadow-2xl transition-all duration-300"
+          >
+            <div className="p-8">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#7bbf42] to-[#f9b414] flex items-center justify-center text-3xl mb-6">
+                {data.vision.icon}
+              </div>
+              <h3 className="text-2xl font-bold text-[#040404] mb-4">{data.vision.title}</h3>
+              <p className="text-gray-600 leading-relaxed">{data.vision.content}</p>
+            </div>
+            <div className="h-2 bg-gradient-to-r from-[#7bbf42] to-[#70308c]"></div>
+          </motion.div>
+
+          {/* Mission Card */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-2xl shadow-xl overflow-hidden border border-[#f9b414]/20 hover:shadow-2xl transition-all duration-300"
+          >
+            <div className="p-8">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#f9b414] to-[#70308c] flex items-center justify-center text-3xl mb-6">
+                {data.mission.icon}
+              </div>
+              <h3 className="text-2xl font-bold text-[#040404] mb-4">{data.mission.title}</h3>
+              <p className="text-gray-600 leading-relaxed">{data.mission.content}</p>
+            </div>
+            <div className="h-2 bg-gradient-to-r from-[#f9b414] to-[#7bbf42]"></div>
+          </motion.div>
+        </div>
+
+        {/* Core Values */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h3 className="text-3xl font-bold text-[#040404] mb-6">
+            Our <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#70308c] to-[#7bbf42]">Values</span>
+          </h3>
+        </motion.div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {data.values.map((value, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 + 0.6 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -10 }}
+              className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
+            >
+              <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl mb-4 mx-auto ${
+                index % 3 === 0 ? 'bg-[#7bbf42]/10 text-[#7bbf42]' :
+                index % 3 === 1 ? 'bg-[#f9b414]/10 text-[#f9b414]' :
+                'bg-[#70308c]/10 text-[#70308c]'
+              }`}>
+                {value.icon}
+              </div>
+              <h4 className="text-xl font-bold text-[#040404] mb-3">{value.title}</h4>
+              <p className="text-gray-600">{value.content}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 };
 

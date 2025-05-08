@@ -2,28 +2,116 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
-const apiUrl = import.meta.env.VITE_API_URL;
-
-const ServiceModal = ({ serviceId, onClose }) => {
+const ServiceCard = ({ serviceId, onClose }) => {
   const [service, setService] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchService = async () => {
-      try {
-        const response = await fetch(`${apiUrl}/service/service-card/${serviceId}`);
-        if (!response.ok) throw new Error('Service not found');
-        const data = await response.json();
-        setService(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
+  // Mock data function to replace API call
+  const fetchMockServiceData = (id) => {
+    const mockServices = {
+      1: {
+        id: 1,
+        title: "Manpower Support Services",
+        category: "support",
+        description: "Comprehensive workforce solutions tailored to your operational needs with skilled professionals.",
+        details: {
+          features: [
+            "Skilled workforce provisioning",
+            "Flexible staffing solutions",
+            "Industry-specific expertise",
+            "24/7 availability",
+            "Cost-effective solutions"
+          ],
+          benefits: [
+            "Reduced hiring costs",
+            "Quick staffing solutions",
+            "Trained professionals",
+            "Scalable workforce",
+            "Compliance with labor laws"
+          ]
+        },
+        icon: "👥",
+        industries: ["Construction", "Healthcare", "Hospitality", "Retail"],
+        image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80"
+      },
+      2: {
+        id: 2,
+        title: "Professional Cleaning Services",
+        category: "soft",
+        description: "Premium cleaning solutions for facilities of all sizes, ensuring hygienic and pristine environments.",
+        details: {
+          features: [
+            "Daily, weekly, or monthly plans",
+            "Eco-friendly products",
+            "Trained cleaning staff",
+            "Customized schedules",
+            "Quality inspections"
+          ],
+          benefits: [
+            "Improved hygiene standards",
+            "Enhanced facility appearance",
+            "Healthier environment",
+            "Tailored cleaning plans",
+            "24/7 emergency service"
+          ]
+        },
+        icon: "🧹",
+        industries: ["Commercial", "Healthcare", "Education", "Government"],
+        image: "https://images.unsplash.com/photo-1600585152220-90363fe7e115?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+      },
+      3: {
+        id: 3,
+        title: "HVAC Maintenance",
+        category: "hard",
+        description: "Expert installation and maintenance of heating, ventilation, and air conditioning systems.",
+        details: {
+          features: [
+            "Preventive maintenance",
+            "24/7 emergency service",
+            "Energy efficiency audits",
+            "System upgrades",
+            "Indoor air quality checks"
+          ],
+          benefits: [
+            "Extended equipment life",
+            "Reduced energy costs",
+            "Improved air quality",
+            "Minimized downtime",
+            "Certified technicians"
+          ]
+        },
+        icon: "❄️",
+        industries: ["Commercial", "Residential", "Healthcare", "Industrial"],
+        image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
       }
     };
+    return mockServices[id] || null;
+  };
 
-    if (serviceId) fetchService();
+  useEffect(() => {
+    if (serviceId) {
+      setIsLoading(true);
+      setError(null);
+      
+      // Simulate API call with timeout
+      const timer = setTimeout(() => {
+        try {
+          const data = fetchMockServiceData(serviceId);
+          if (data) {
+            setService(data);
+          } else {
+            throw new Error('Service not found');
+          }
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
+        }
+      }, 500); // Simulate network delay
+
+      return () => clearTimeout(timer);
+    }
   }, [serviceId]);
 
   const getCategoryColor = (category) => {
@@ -61,7 +149,7 @@ const ServiceModal = ({ serviceId, onClose }) => {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 50 }}
               transition={{ type: 'spring', damping: 25 }}
-              className="relative bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-4xl"
+              className="relative bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-4xl max-h-[90vh] overflow-y-auto"
             >
               {isLoading ? (
                 <div className="p-8">
@@ -86,11 +174,11 @@ const ServiceModal = ({ serviceId, onClose }) => {
                   </div>
                 </div>
               ) : error ? (
-                <div className="p-8 text-center text-red-500">
-                  <p>{error}</p>
+                <div className="p-8 text-center">
+                  <p className="text-red-500 mb-4">{error}</p>
                   <button 
                     onClick={onClose}
-                    className="mt-4 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200"
+                    className="px-4 py-2 bg-[#7bbf42] text-white rounded-lg hover:bg-[#5a9a32] transition-colors"
                   >
                     Close
                   </button>
@@ -187,6 +275,9 @@ const ServiceModal = ({ serviceId, onClose }) => {
                               src={service.image} 
                               alt={service.title} 
                               className="w-full h-48 object-cover"
+                              onError={(e) => {
+                                e.target.src = 'https://via.placeholder.com/800x400?text=Service+Image';
+                              }}
                             />
                           </div>
                         )}
@@ -280,4 +371,4 @@ const ServiceModal = ({ serviceId, onClose }) => {
   );
 };
 
-export default ServiceModal;
+export default ServiceCard;
