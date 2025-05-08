@@ -29,6 +29,9 @@ urlpatterns = [
     path('home/our-clients/', OurClientsView.as_view(), name='our_clients'),
     path('home/associates/', AssociatesView.as_view(), name='associates'),
     path('home/about-preview/', AboutPreview.as_view(), name='aboutpreview'),
+    path('home/testimonials/', Testimonials.as_view(), name='testimonials'),
+    path('home/contacts/', Contact.as_view(), name='contact'),
+    path('home/client-logos/', ClietLogos.as_view(), name='client_logos'),
 
     path('home/industries/', IndustriesView.as_view(), name='news'),
     path('home/contact/', ContactView.as_view(), name='contact'),
@@ -49,10 +52,27 @@ urlpatterns = [
     # Projects Section
     path('projects/', ProjectsView.as_view(), name='projects'),
 
-    
+    # Service Section
+    path('service/service-list/', ServiceListView.as_view(), name='servicelist'),
+    path('service/service-card/', ServiceCardView.as_view(), name='servicecard'),
+    path('service-model/', ServicemodelView.as_view(), name='servicemodel'),
+
 
       # Projects Section
     path('services/', ServicesPageView.as_view(), name='services-pages'),
+    path('project/project-gallery/', ProjectGallery.as_view(), name='project_gallery'),
+    path('project/project-card/', ProjectCard.as_view(), name='project_card'),
+
+    # sustainability
+    path('sustainability/', Sustainability.as_view(), name='sustainability'),
+
+    # career Info
+    path('career/', Career.as_view(), name='career'),
+   
+
+   # QuoteForm
+   path('quote/', QuoteForm.as_view(), name='quote'),
+
 
 
  # Projects Section

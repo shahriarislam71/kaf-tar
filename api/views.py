@@ -106,6 +106,9 @@ class CardsView(JsonDBView):
 class ServicesView(JsonDBView):
     model_name = 'services_data'
 
+class ClietLogos(JsonDBView):
+    model_name = 'client-logos'
+
 class StatisticsView(JsonDBView):
     model_name = 'statistics_data'
 
@@ -123,6 +126,11 @@ class AssociatesView(JsonDBView):
 
 class AboutPreview(JsonDBView):
     model_name = 'about_preview'
+
+class Testimonials(JsonDBView):
+    model_name = 'testimonials'
+class Contact(JsonDBView):
+    model_name = 'contact'
 
 
 class IndustriesView(JsonDBView):
@@ -168,11 +176,35 @@ class Contact2View(JsonDBView):
 class ServicesPageView(JsonDBView):
     model_name = 'services_page_data'
 
+class ServiceListView(JsonDBView):
+    model_name = 'serviceList'
+
+class ServiceCardView(JsonDBView):
+    model_name = 'servicecard'
+
+class Sustainability(JsonDBView):
+    model_name = 'sustainability'
+
+class Career(JsonDBView):
+    model_name = 'career'
+
+class ServicemodelView(JsonDBView):
+    model_name = 'service-model'
+
 
 # Projects View
 class ProjectsView(JsonDBView):
     model_name = 'projects_data'
 
+class ProjectGallery(JsonDBView):
+    model_name = 'projectGallery'
+
+class ProjectCard(JsonDBView):
+    model_name = 'projectCard'
+
+# Quote Form
+class QuoteForm(JsonDBView):
+    model_name = 'quoteForm'
 
 # Gallery View
 class GalleryView(JsonDBView):
