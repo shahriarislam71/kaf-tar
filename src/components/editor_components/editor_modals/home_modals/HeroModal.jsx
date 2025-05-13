@@ -1,24 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, Input, message, Upload, Spin, Card } from 'antd';
+import { Modal, Button, Form, Input, message, Upload, Spin, Card, Select } from 'antd';
 import { UploadOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { SketchPicker } from 'react-color';
 import Swal from 'sweetalert2';
 
 const { TextArea } = Input;
+const { Option } = Select;
 
 const HeroModal = ({ isOpen, onClose }) => {
   const [form] = Form.useForm();
   const [stats, setStats] = useState([]);
-  const [newStat, setNewStat] = useState({ value: '', label: '' });
+  const [newStat, setNewStat] = useState({ value: '', label: '', icon: '' });
   const [loading, setLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
   const [colorPickerVisible, setColorPickerVisible] = useState(false);
-  const [ctaStyle, setCtaStyle] = useState({
-    primaryColor: '#2ecc71',
-    secondaryColor: '#f1c40f',
-    textColor: '#ffffff'
+  const [gradient, setGradient] = useState({
+    from: '#040404',
+    via: '#7bbf42',
+    to: '#70308c'
   });
+  const [accentColor, setAccentColor] = useState('#f9b414');
   const [imageUrl, setImageUrl] = useState('');
+
+  const iconOptions = [
+    'building',
+    'heart',
+    'shield',
+    'certificate',
+    'users',
+    'clock',
+    'award',
+    'check-circle',
+    'star',
+    'thumbs-up'
+  ];
 
   useEffect(() => {
     if (isOpen) {
@@ -39,27 +54,30 @@ const HeroModal = ({ isOpen, onClose }) => {
       const data = await response.json();
       
       form.setFieldsValue({
-        headline: data.headline,
-        subheadline: data.subheadline,
-        tagline: data.tagline,
-        primaryButtonText: data.primaryButton?.text || 'Get Free Quote',
-        primaryButtonLink: data.primaryButton?.link || '/contact',
-        secondaryButtonText: data.secondaryButton?.text || 'View Projects',
-        secondaryButtonLink: data.secondaryButton?.link || '/projects',
-        backgroundImage: data.backgroundImage,
-        featuredService1: data.featuredServices?.[0] || '',
-        featuredService2: data.featuredServices?.[1] || '',
-        featuredService3: data.featuredServices?.[2] || '',
+        title: data.title || "Kaf Tar - Premier Facility Management",
+        subtitle: data.subtitle || "Delivering exceptional operation & maintenance services across Saudi Arabia",
+        highlightText: data.highlightText || "CERTIFIED PROFESSIONALS | 24/7 SUPPORT | QUALITY GUARANTEED",
+        ctaButtonText: data.ctaButton?.text || "Request Free Consultation",
+        ctaButtonLink: data.ctaButton?.link || "/contact"
       });
 
-      if (data.ctaStyle) {
-        setCtaStyle(data.ctaStyle);
+      if (data.gradient) {
+        setGradient({
+          from: data.gradient.from || '#040404',
+          via: data.gradient.via || '#7bbf42',
+          to: data.gradient.to || '#70308c'
+        });
+      }
+
+      if (data.accentColor) {
+        setAccentColor(data.accentColor || '#f9b414');
       }
 
       setStats(data.stats || [
-        { value: '15+', label: 'Years Experience' },
-        { value: '200+', label: 'Projects Completed' },
-        { value: '50+', label: 'Happy Clients' }
+        { value: '500+', label: 'Facilities Managed', icon: 'building' },
+        { value: '99%', label: 'Client Satisfaction', icon: 'heart' },
+        { value: '24/7', label: 'Emergency Response', icon: 'shield' },
+        { value: 'ISO', label: 'Certified Quality', icon: 'certificate' }
       ]);
 
       setImageUrl(data.backgroundImage || '');
@@ -138,7 +156,7 @@ const HeroModal = ({ isOpen, onClose }) => {
   const handleAddStat = () => {
     if (newStat.value.trim() && newStat.label.trim()) {
       setStats([...stats, { ...newStat }]);
-      setNewStat({ value: '', label: '' });
+      setNewStat({ value: '', label: '', icon: '' });
     }
   };
 
@@ -152,10 +170,10 @@ const HeroModal = ({ isOpen, onClose }) => {
     setStats(updatedStats);
   };
 
-  const handleColorChange = (color, field) => {
-    setCtaStyle({
-      ...ctaStyle,
-      [field]: color.hex
+  const handleGradientChange = (color, position) => {
+    setGradient({
+      ...gradient,
+      [position]: color.hex
     });
   };
 
@@ -163,25 +181,17 @@ const HeroModal = ({ isOpen, onClose }) => {
     try {
       const values = await form.validateFields();
       const updatedData = {
-        headline: values.headline,
-        subheadline: values.subheadline,
-        tagline: values.tagline,
-        primaryButton: {
-          text: values.primaryButtonText,
-          link: values.primaryButtonLink
+        title: values.title,
+        subtitle: values.subtitle,
+        highlightText: values.highlightText,
+        ctaButton: {
+          text: values.ctaButtonText,
+          link: values.ctaButtonLink
         },
-        secondaryButton: {
-          text: values.secondaryButtonText,
-          link: values.secondaryButtonLink
-        },
-        backgroundImage: values.backgroundImage,
+        backgroundImage: imageUrl,
         stats: stats,
-        featuredServices: [
-          values.featuredService1,
-          values.featuredService2,
-          values.featuredService3
-        ].filter(Boolean),
-        ctaStyle: ctaStyle
+        gradient: gradient,
+        accentColor: accentColor
       };
 
       const apiUrl = import.meta.env.VITE_API_URL;
@@ -198,12 +208,12 @@ const HeroModal = ({ isOpen, onClose }) => {
       }
 
       Swal.fire({
-              position: "top-end",
-              icon: "success",
-              title: "Services Content Added Successfully",
-              showConfirmButton: false,
-              timer: 3000
-            });
+        position: "top-end",
+        icon: "success",
+        title: "Hero Section Updated Successfully",
+        showConfirmButton: false,
+        timer: 3000
+      });
       onClose();
     } catch (error) {
       console.error('Error saving hero data:', error);
@@ -213,11 +223,15 @@ const HeroModal = ({ isOpen, onClose }) => {
 
   return (
     <Modal
-      title={<span className="text-xl font-bold text-gray-800">Edit Hero Section</span>}
+      title={<span className="text-2xl font-bold text-[#040404]">Edit Hero Section</span>}
       visible={isOpen}
       onCancel={onClose}
       footer={[
-        <Button key="back" onClick={onClose} className="px-6 h-10 rounded-lg border-gray-300 hover:bg-gray-100">
+        <Button 
+          key="back" 
+          onClick={onClose} 
+          className="px-6 h-10 rounded-lg border-gray-300 hover:bg-gray-100 text-[#040404]"
+        >
           Cancel
         </Button>,
         <Button 
@@ -225,14 +239,18 @@ const HeroModal = ({ isOpen, onClose }) => {
           type="primary" 
           onClick={handleSubmit}
           loading={loading}
-          style={{ backgroundColor: ctaStyle.primaryColor, borderColor: ctaStyle.primaryColor }}
-          className="px-6 h-10 rounded-lg hover:opacity-90"
+          style={{ 
+            backgroundColor: accentColor, 
+            borderColor: accentColor,
+            color: '#040404'
+          }}
+          className="px-6 h-10 rounded-lg hover:opacity-90 font-medium"
         >
           Save Changes
         </Button>,
       ]}
       width={900}
-      className="rounded-lg overflow-hidden"
+      className="rounded-xl overflow-hidden"
       bodyStyle={{ padding: '24px' }}
     >
       <Spin spinning={loading}>
@@ -240,262 +258,299 @@ const HeroModal = ({ isOpen, onClose }) => {
           <Card 
             title="Main Content" 
             bordered={false} 
-            className="rounded-lg shadow-sm border-0"
+            className="rounded-xl shadow-sm border-0 bg-gradient-to-r from-[#f9f9f9] to-white"
             headStyle={{ 
-              background: 'linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%)',
-              borderBottom: '1px solid #e8e8e8'
+              borderBottom: '1px solid #e8e8e8',
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#040404'
             }}
           >
             <div className="grid grid-cols-1 gap-6">
               <Form.Item
-                name="headline"
-                label={<span className="font-medium text-gray-700">Headline</span>}
-                rules={[{ required: true, message: 'Please enter the headline' }]}
+                name="title"
+                label={<span className="font-medium text-[#040404]">Main Title</span>}
+                rules={[{ required: true, message: 'Please enter the main title' }]}
               >
                 <Input 
                   size="large" 
-                  placeholder="e.g., Building Dreams, Crafting Reality" 
-                  className="rounded-lg hover:border-green-400 focus:border-green-400"
+                  placeholder="e.g., Kaf Tar - Premier Facility Management" 
+                  className="rounded-lg hover:border-[#7bbf42] focus:border-[#7bbf42]"
                 />
               </Form.Item>
 
               <Form.Item
-                name="subheadline"
-                label={<span className="font-medium text-gray-700">Subheadline</span>}
-                rules={[{ required: true, message: 'Please enter the subheadline' }]}
+                name="subtitle"
+                label={<span className="font-medium text-[#040404]">Subtitle</span>}
+                rules={[{ required: true, message: 'Please enter the subtitle' }]}
               >
                 <Input 
                   size="large" 
-                  placeholder="e.g., Premium Construction Services" 
-                  className="rounded-lg hover:border-green-400 focus:border-green-400"
+                  placeholder="e.g., Delivering exceptional operation & maintenance services" 
+                  className="rounded-lg hover:border-[#7bbf42] focus:border-[#7bbf42]"
                 />
               </Form.Item>
 
               <Form.Item
-                name="tagline"
-                label={<span className="font-medium text-gray-700">Tagline/Description</span>}
-                rules={[{ required: true, message: 'Please enter the description' }]}
+                name="highlightText"
+                label={<span className="font-medium text-[#040404]">Highlight Text</span>}
+                rules={[{ required: true, message: 'Please enter highlight text' }]}
               >
-                <TextArea 
-                  rows={4} 
-                  placeholder="e.g., Stech Builders delivers exceptional construction services with 15+ years of experience in residential and commercial projects." 
-                  className="rounded-lg hover:border-green-400 focus:border-green-400"
+                <Input 
+                  size="large" 
+                  placeholder="e.g., CERTIFIED PROFESSIONALS | 24/7 SUPPORT | QUALITY GUARANTEED" 
+                  className="rounded-lg hover:border-[#7bbf42] focus:border-[#7bbf42]"
                 />
               </Form.Item>
             </div>
           </Card>
 
           <Card 
-            title="Featured Services" 
+            title="Call to Action" 
             bordered={false} 
-            className="rounded-lg shadow-sm border-0"
+            className="rounded-xl shadow-sm border-0 bg-gradient-to-r from-[#f9f9f9] to-white"
             headStyle={{ 
-              background: 'linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%)',
-              borderBottom: '1px solid #e8e8e8'
-            }}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Form.Item
-                name="featuredService1"
-                label={<span className="font-medium text-gray-700">Service 1</span>}
-              >
-                <Input 
-                  placeholder="e.g., Residential Construction" 
-                  className="rounded-lg hover:border-green-400 focus:border-green-400" 
-                />
-              </Form.Item>
-              <Form.Item
-                name="featuredService2"
-                label={<span className="font-medium text-gray-700">Service 2</span>}
-              >
-                <Input 
-                  placeholder="e.g., Commercial Projects" 
-                  className="rounded-lg hover:border-green-400 focus:border-green-400" 
-                />
-              </Form.Item>
-              <Form.Item
-                name="featuredService3"
-                label={<span className="font-medium text-gray-700">Service 3</span>}
-              >
-                <Input 
-                  placeholder="e.g., Renovations" 
-                  className="rounded-lg hover:border-green-400 focus:border-green-400" 
-                />
-              </Form.Item>
-            </div>
-          </Card>
-
-          <Card 
-            title="Call to Action Buttons" 
-            bordered={false} 
-            className="rounded-lg shadow-sm border-0"
-            headStyle={{ 
-              background: 'linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%)',
-              borderBottom: '1px solid #e8e8e8'
+              borderBottom: '1px solid #e8e8e8',
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#040404'
             }}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h4 className="font-medium text-gray-700">Primary Button</h4>
-                <Form.Item
-                  name="primaryButtonText"
-                  label={<span className="font-medium text-gray-700">Button Text</span>}
-                  rules={[{ required: true, message: 'Please enter button text' }]}
-                >
-                  <Input 
-                    placeholder="e.g., Get Free Quote" 
-                    className="rounded-lg hover:border-green-400 focus:border-green-400" 
-                  />
-                </Form.Item>
-                <Form.Item
-                  name="primaryButtonLink"
-                  label={<span className="font-medium text-gray-700">Button Link</span>}
-                  rules={[{ required: true, message: 'Please enter button link' }]}
-                >
-                  <Input 
-                    placeholder="e.g., /contact" 
-                    className="rounded-lg hover:border-green-400 focus:border-green-400" 
-                  />
-                </Form.Item>
-                <div className="flex items-center gap-4">
-                  <span className="font-medium text-gray-700">Button Color:</span>
-                  <div 
-                    className="w-8 h-8 rounded-lg cursor-pointer border border-gray-300 hover:border-green-500 transition-all"
-                    style={{ backgroundColor: ctaStyle.primaryColor }}
-                    onClick={() => setColorPickerVisible('primary')}
-                  />
-                  {colorPickerVisible === 'primary' && (
-                    <div className="absolute z-10">
-                      <div className="p-2 bg-white rounded-lg shadow-xl">
-                        <SketchPicker 
-                          color={ctaStyle.primaryColor} 
-                          onChangeComplete={(color) => handleColorChange(color, 'primaryColor')} 
-                        />
-                        <Button 
-                          size="small" 
-                          onClick={() => setColorPickerVisible(false)}
-                          className="mt-2 w-full rounded-lg"
-                          style={{ backgroundColor: ctaStyle.primaryColor, color: ctaStyle.textColor, borderColor: ctaStyle.primaryColor }}
-                        >
-                          Close
-                        </Button>
-                      </div>
+              <Form.Item
+                name="ctaButtonText"
+                label={<span className="font-medium text-[#040404]">Button Text</span>}
+                rules={[{ required: true, message: 'Please enter button text' }]}
+              >
+                <Input 
+                  placeholder="e.g., Request Free Consultation" 
+                  className="rounded-lg hover:border-[#7bbf42] focus:border-[#7bbf42]" 
+                />
+              </Form.Item>
+              <Form.Item
+                name="ctaButtonLink"
+                label={<span className="font-medium text-[#040404]">Button Link</span>}
+                rules={[{ required: true, message: 'Please enter button link' }]}
+              >
+                <Input 
+                  placeholder="e.g., /contact" 
+                  className="rounded-lg hover:border-[#7bbf42] focus:border-[#7bbf42]" 
+                />
+              </Form.Item>
+            </div>
+            <div className="mt-4">
+              <h4 className="font-medium text-[#040404] mb-2">Accent Color</h4>
+              <div className="flex items-center gap-4">
+                <div 
+                  className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-300 hover:border-[#f9b414] transition-all"
+                  style={{ backgroundColor: accentColor }}
+                  onClick={() => setColorPickerVisible('accent')}
+                />
+                {colorPickerVisible === 'accent' && (
+                  <div className="absolute z-10">
+                    <div className="p-2 bg-white rounded-lg shadow-xl border border-gray-200">
+                      <SketchPicker 
+                        color={accentColor} 
+                        onChangeComplete={(color) => setAccentColor(color.hex)} 
+                      />
+                      <Button 
+                        size="small" 
+                        onClick={() => setColorPickerVisible(false)}
+                        className="mt-2 w-full rounded-lg"
+                        style={{ backgroundColor: accentColor, color: '#040404', borderColor: accentColor }}
+                      >
+                        Close
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                <span className="text-sm text-gray-600">Used for buttons and highlights</span>
+              </div>
+            </div>
+          </Card>
+
+          <Card 
+            title="Background & Gradient" 
+            bordered={false} 
+            className="rounded-xl shadow-sm border-0 bg-gradient-to-r from-[#f9f9f9] to-white"
+            headStyle={{ 
+              borderBottom: '1px solid #e8e8e8',
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#040404'
+            }}
+          >
+            <div className="grid grid-cols-1 gap-6">
+              <Form.Item
+                name="backgroundImage"
+                label={<span className="font-medium text-[#040404]">Background Image</span>}
+                rules={[{ required: true, message: 'Please upload background image' }]}
+              >
+                <div className="flex flex-col gap-4">
+                  <Upload {...uploadProps}>
+                    <Button 
+                      icon={<UploadOutlined />} 
+                      loading={imageLoading}
+                      className="h-10 rounded-lg"
+                      style={{ 
+                        backgroundColor: '#7bbf42', 
+                        color: 'white', 
+                        borderColor: '#7bbf42' 
+                      }}
+                    >
+                      Upload Background Image
+                    </Button>
+                  </Upload>
+                  {imageUrl && (
+                    <div className="relative group">
+                      <img 
+                        src={imageUrl} 
+                        alt="Preview" 
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                      <Button 
+                        danger 
+                        icon={<DeleteOutlined />} 
+                        onClick={handleRemoveImage}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ backgroundColor: '#ff4d4f', color: 'white', borderColor: '#ff4d4f' }}
+                      >
+                        Remove
+                      </Button>
                     </div>
                   )}
                 </div>
-              </div>
+              </Form.Item>
 
-              <div className="space-y-4">
-                <h4 className="font-medium text-gray-700">Secondary Button</h4>
-                <Form.Item
-                  name="secondaryButtonText"
-                  label={<span className="font-medium text-gray-700">Button Text</span>}
-                  rules={[{ required: true, message: 'Please enter button text' }]}
-                >
-                  <Input 
-                    placeholder="e.g., View Projects" 
-                    className="rounded-lg hover:border-green-400 focus:border-green-400" 
-                  />
-                </Form.Item>
-                <Form.Item
-                  name="secondaryButtonLink"
-                  label={<span className="font-medium text-gray-700">Button Link</span>}
-                  rules={[{ required: true, message: 'Please enter button link' }]}
-                >
-                  <Input 
-                    placeholder="e.g., /projects" 
-                    className="rounded-lg hover:border-green-400 focus:border-green-400" 
-                  />
-                </Form.Item>
-                <div className="flex items-center gap-4">
-                  <span className="font-medium text-gray-700">Button Color:</span>
-                  <div 
-                    className="w-8 h-8 rounded-lg cursor-pointer border border-gray-300 hover:border-yellow-500 transition-all"
-                    style={{ backgroundColor: ctaStyle.secondaryColor }}
-                    onClick={() => setColorPickerVisible('secondary')}
-                  />
-                  {colorPickerVisible === 'secondary' && (
-                    <div className="absolute z-10">
-                      <div className="p-2 bg-white rounded-lg shadow-xl">
-                        <SketchPicker 
-                          color={ctaStyle.secondaryColor} 
-                          onChangeComplete={(color) => handleColorChange(color, 'secondaryColor')} 
-                        />
-                        <Button 
-                          size="small" 
-                          onClick={() => setColorPickerVisible(false)}
-                          className="mt-2 w-full rounded-lg"
-                          style={{ backgroundColor: ctaStyle.secondaryColor, color: '#2c3e50', borderColor: ctaStyle.secondaryColor }}
-                        >
-                          Close
-                        </Button>
-                      </div>
+              <div>
+                <h4 className="font-medium text-[#040404] mb-4">Overlay Gradient</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">From</label>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-300 hover:border-[#7bbf42] transition-all"
+                        style={{ backgroundColor: gradient.from }}
+                        onClick={() => setColorPickerVisible('from')}
+                      />
+                      {colorPickerVisible === 'from' && (
+                        <div className="absolute z-10">
+                          <div className="p-2 bg-white rounded-lg shadow-xl border border-gray-200">
+                            <SketchPicker 
+                              color={gradient.from} 
+                              onChangeComplete={(color) => handleGradientChange(color, 'from')} 
+                            />
+                            <Button 
+                              size="small" 
+                              onClick={() => setColorPickerVisible(false)}
+                              className="mt-2 w-full rounded-lg"
+                              style={{ backgroundColor: accentColor, color: '#040404', borderColor: accentColor }}
+                            >
+                              Close
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      <Input 
+                        value={gradient.from} 
+                        onChange={(e) => setGradient({...gradient, from: e.target.value})}
+                        className="rounded-lg hover:border-[#7bbf42] focus:border-[#7bbf42]"
+                      />
                     </div>
-                  )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Via</label>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-300 hover:border-[#7bbf42] transition-all"
+                        style={{ backgroundColor: gradient.via }}
+                        onClick={() => setColorPickerVisible('via')}
+                      />
+                      {colorPickerVisible === 'via' && (
+                        <div className="absolute z-10">
+                          <div className="p-2 bg-white rounded-lg shadow-xl border border-gray-200">
+                            <SketchPicker 
+                              color={gradient.via} 
+                              onChangeComplete={(color) => handleGradientChange(color, 'via')} 
+                            />
+                            <Button 
+                              size="small" 
+                              onClick={() => setColorPickerVisible(false)}
+                              className="mt-2 w-full rounded-lg"
+                              style={{ backgroundColor: accentColor, color: '#040404', borderColor: accentColor }}
+                            >
+                              Close
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      <Input 
+                        value={gradient.via} 
+                        onChange={(e) => setGradient({...gradient, via: e.target.value})}
+                        className="rounded-lg hover:border-[#7bbf42] focus:border-[#7bbf42]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-300 hover:border-[#7bbf42] transition-all"
+                        style={{ backgroundColor: gradient.to }}
+                        onClick={() => setColorPickerVisible('to')}
+                      />
+                      {colorPickerVisible === 'to' && (
+                        <div className="absolute z-10">
+                          <div className="p-2 bg-white rounded-lg shadow-xl border border-gray-200">
+                            <SketchPicker 
+                              color={gradient.to} 
+                              onChangeComplete={(color) => handleGradientChange(color, 'to')} 
+                            />
+                            <Button 
+                              size="small" 
+                              onClick={() => setColorPickerVisible(false)}
+                              className="mt-2 w-full rounded-lg"
+                              style={{ backgroundColor: accentColor, color: '#040404', borderColor: accentColor }}
+                            >
+                              Close
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      <Input 
+                        value={gradient.to} 
+                        onChange={(e) => setGradient({...gradient, to: e.target.value})}
+                        className="rounded-lg hover:border-[#7bbf42] focus:border-[#7bbf42]"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 p-4 rounded-lg" style={{
+                  background: `linear-gradient(to right, ${gradient.from}, ${gradient.via}, ${gradient.to})`,
+                  height: '80px'
+                }}>
+                  <p className="text-white text-center font-medium">Gradient Preview</p>
                 </div>
               </div>
             </div>
           </Card>
 
           <Card 
-            title="Background Image" 
+            title="Key Statistics" 
             bordered={false} 
-            className="rounded-lg shadow-sm border-0"
+            className="rounded-xl shadow-sm border-0 bg-gradient-to-r from-[#f9f9f9] to-white"
             headStyle={{ 
-              background: 'linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%)',
-              borderBottom: '1px solid #e8e8e8'
-            }}
-          >
-            <Form.Item
-              name="backgroundImage"
-              rules={[{ required: true, message: 'Please upload background image' }]}
-            >
-              <div className="flex flex-col gap-4">
-                <Upload {...uploadProps}>
-                  <Button 
-                    icon={<UploadOutlined />} 
-                    loading={imageLoading}
-                    className="h-10 rounded-lg"
-                    style={{ backgroundColor: ctaStyle.primaryColor, color: ctaStyle.textColor, borderColor: ctaStyle.primaryColor }}
-                  >
-                    Upload Construction Site Image
-                  </Button>
-                </Upload>
-                {imageUrl && (
-                  <div className="relative group">
-                    <img 
-                      src={imageUrl} 
-                      alt="Preview" 
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                    <Button 
-                      danger 
-                      icon={<DeleteOutlined />} 
-                      onClick={handleRemoveImage}
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ backgroundColor: '#ff4d4f', color: 'white', borderColor: '#ff4d4f' }}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </Form.Item>
-          </Card>
-
-          <Card 
-            title="Company Statistics" 
-            bordered={false} 
-            className="rounded-lg shadow-sm border-0"
-            headStyle={{ 
-              background: 'linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%)',
-              borderBottom: '1px solid #e8e8e8'
+              borderBottom: '1px solid #e8e8e8',
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#040404'
             }}
           >
             <div className="space-y-4">
-              <h4 className="font-medium text-gray-700">Key Statistics</h4>
-              <p className="text-gray-500 text-sm">
-                Display impressive numbers that highlight your company's experience and success
+              <p className="text-gray-600">
+                Showcase your company's achievements with impactful statistics
               </p>
               
               <div className="space-y-3">
@@ -504,15 +559,29 @@ const HeroModal = ({ isOpen, onClose }) => {
                     <Input
                       value={stat.value}
                       onChange={(e) => handleStatChange('value', e.target.value, index)}
-                      placeholder="Value (e.g., 200+)"
-                      className="flex-1 rounded-lg hover:border-green-400 focus:border-green-400"
+                      placeholder="Value (e.g., 500+)"
+                      className="flex-1 rounded-lg hover:border-[#7bbf42] focus:border-[#7bbf42]"
                     />
                     <Input
                       value={stat.label}
                       onChange={(e) => handleStatChange('label', e.target.value, index)}
-                      placeholder="Label (e.g., Projects Completed)"
-                      className="flex-1 rounded-lg hover:border-green-400 focus:border-green-400"
+                      placeholder="Label (e.g., Facilities Managed)"
+                      className="flex-1 rounded-lg hover:border-[#7bbf42] focus:border-[#7bbf42]"
                     />
+                    <Select
+                      value={stat.icon}
+                      onChange={(value) => handleStatChange('icon', value, index)}
+                      placeholder="Select icon"
+                      className="w-32 rounded-lg"
+                    >
+                      {iconOptions.map(icon => (
+                        <Option key={icon} value={icon}>
+                          <div className="flex items-center">
+                            <span className="mr-2">{icon}</span>
+                          </div>
+                        </Option>
+                      ))}
+                    </Select>
                     <Button 
                       danger 
                       icon={<DeleteOutlined />}
@@ -527,21 +596,35 @@ const HeroModal = ({ isOpen, onClose }) => {
                   <Input
                     value={newStat.value}
                     onChange={(e) => setNewStat({...newStat, value: e.target.value})}
-                    placeholder="Value (e.g., 200+)"
-                    className="flex-1 rounded-lg hover:border-green-400 focus:border-green-400"
+                    placeholder="Value (e.g., 500+)"
+                    className="flex-1 rounded-lg hover:border-[#7bbf42] focus:border-[#7bbf42]"
                   />
                   <Input
                     value={newStat.label}
                     onChange={(e) => setNewStat({...newStat, label: e.target.value})}
-                    placeholder="Label (e.g., Projects Completed)"
-                    className="flex-1 rounded-lg hover:border-green-400 focus:border-green-400"
+                    placeholder="Label (e.g., Facilities Managed)"
+                    className="flex-1 rounded-lg hover:border-[#7bbf42] focus:border-[#7bbf42]"
                   />
+                  <Select
+                    value={newStat.icon}
+                    onChange={(value) => setNewStat({...newStat, icon: value})}
+                    placeholder="Select icon"
+                    className="w-32 rounded-lg"
+                  >
+                    {iconOptions.map(icon => (
+                      <Option key={icon} value={icon}>
+                        <div className="flex items-center">
+                          <span className="mr-2">{icon}</span>
+                        </div>
+                      </Option>
+                    ))}
+                  </Select>
                   <Button 
                     type="primary" 
                     icon={<PlusOutlined />} 
                     onClick={handleAddStat}
                     className="flex items-center justify-center rounded-lg"
-                    style={{ backgroundColor: ctaStyle.primaryColor, color: ctaStyle.textColor, borderColor: ctaStyle.primaryColor }}
+                    style={{ backgroundColor: '#7bbf42', color: 'white', borderColor: '#7bbf42' }}
                   >
                     Add
                   </Button>

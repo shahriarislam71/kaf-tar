@@ -12,6 +12,7 @@ import AssociatesModal from './editor_modals/home_modals/AssociatesModal';
 import IndustriesModal from './editor_modals/home_modals/IndustriesModal';
 import TimelineModal from './editor_modals/home_modals/TimelineModal';
 import AboutPreviewModal from './editor_modals/home_modals/AboutPreviewModal';
+import ContactModal from './editor_modals/home_modals/LocationModal';
 
 const HomeEditor = ({ getDivider, availableShapes }) => {
   const [isCarouselOpen, setCarouselOpen] = useState(false);
@@ -32,17 +33,17 @@ const HomeEditor = ({ getDivider, availableShapes }) => {
       {/* Buttons Section */}
       <div className='grid grid-cols-2 gap-28 font-bold text-center'>
         <button className="btn btn-primary w-20 m-2" onClick={() => setHeroOpen(true)}>Hero</button>
-        <button className="btn btn-primary w-20 m-2" onClick={() => setAboutPreview(true)}>About Preview</button>
-        <button className="btn btn-primary w-20 m-2" onClick={() => setCardsOpen(true)}>Country Cards</button>
+        {/* <button className="btn btn-primary w-20 m-2" onClick={() => setAboutPreview(true)}>About Preview</button> */}
+        {/* <button className="btn btn-primary w-20 m-2" onClick={() => setCardsOpen(true)}>Country Cards</button> */}
         <button className="btn btn-primary w-20 m-2" onClick={() => setServicesOpen(true)}>Services</button>
-        <button className="btn btn-primary w-20 m-2" onClick={() => setStatisticsOpen(true)}>Statistics</button>
-        {/* <button className="btn btn-primary w-20 m-2" onClick={() => setWhyUsOpen(true)}>Why Us</button> */}
-        <button className="btn btn-primary w-20 m-2" onClick={() => setGridCardsOpen(true)}>Timeline</button>
+        {/* <button className="btn btn-primary w-20 m-2" onClick={() => setStatisticsOpen(true)}>Statistics</button> */}
+        <button className="btn btn-primary w-20 m-2" onClick={() => setWhyUsOpen(true)}>Why Us</button>
+        {/* <button className="btn btn-primary w-20 m-2" onClick={() => setGridCardsOpen(true)}>Timeline</button> */}
 
-        <button className="btn btn-primary w-20 m-2" onClick={() => setOurClientsOpen(true)}>Our Clients</button>
-        <button className="btn btn-primary w-20 m-2" onClick={() => setAssociatesOpen(true)}>Associates</button>
+        <button className="btn btn-primary w-20 m-2" onClick={() => setOurClientsOpen(true)}>Our Partners</button>
+        {/* <button className="btn btn-primary w-20 m-2" onClick={() => setAssociatesOpen(true)}>Associates</button> */}
         {/* <button className="btn btn-primary w-20 m-2" onClick={() => setNewsOpen(true)}>Industries</button> */}
-        {/* <button className="btn btn-primary w-20 m-2" onClick={() => setLocationOpen(true)}>Location</button> */}
+        <button className="btn btn-primary w-20 m-2" onClick={() => setLocationOpen(true)}>Contact</button>
       </div>
 
       {/* Mockup Browser Section */}
@@ -69,7 +70,8 @@ const HomeEditor = ({ getDivider, availableShapes }) => {
       <OurClientsModal isOpen={isOurClientsOpen} onClose={() => setOurClientsOpen(false)} />
       <AssociatesModal isOpen={isAssociatesOpen} onClose={() => setAssociatesOpen(false)} />
       <IndustriesModal isOpen={isNewsOpen} onClose={() => setNewsOpen(false)} />
-      <LocationModal isOpen={isLocationOpen} onClose={() => setLocationOpen(false)} />
+      {/* <LocationModal isOpen={isLocationOpen} onClose={() => setLocationOpen(false)} /> */}
+      <ContactModal isOpen={isLocationOpen} onClose={() => setLocationOpen(false)} />
     </div>
   );
 };

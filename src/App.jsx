@@ -23,6 +23,9 @@ import Project from "./pages/Project";
 import QuoteForm from "./pages/QuoteForm";
 import Sustainability from "./pages/Sustainability";
 import CareersPage from "./pages/Career";
+import ProjectPreview from "./components/home_components/Projects";
+import SustainabilityEditor from "./components/editor_components/SustainabilityEditor";
+import CareerEditor from "./components/editor_components/CareerEditor";
 
 // Lazy-loaded pages
 const Home = React.lazy(() => import("./pages/Home"));
@@ -106,6 +109,15 @@ const App = () => {
             </Suspense>
           ),
         },
+        {
+          path: "projects",
+          element: (
+            <Suspense fallback={<div>Loading...</div>}>
+              <ProjectPreview></ProjectPreview>
+            </Suspense>
+          ),
+        },
+  
         
         {
           path: "career",
@@ -288,10 +300,35 @@ const App = () => {
           ),
         },
         {
+          path: "sustainability",
+          element: (
+            <Suspense fallback={<div>Loading...</div>}>
+              <SustainabilityEditor></SustainabilityEditor>
+            </Suspense>
+          ),
+        },
+        {
+          path: "career",
+          element: (
+            <Suspense fallback={<div>Loading...</div>}>
+              <CareerEditor></CareerEditor>
+            </Suspense>
+          ),
+        },
+
+        {
           path: "layouts",
           element: (
             <Suspense fallback={<div>Loading...</div>}>
               <LayoutsEditor />
+            </Suspense>
+          ),
+        },
+        {
+          path: "services",
+          element: (
+            <Suspense fallback={<div>Loading...</div>}>
+              <ServicesEditor></ServicesEditor>
             </Suspense>
           ),
         },

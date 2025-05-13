@@ -58,6 +58,16 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
             <FaBox className='mr-2' /> About 
           </NavLink>
         </li>
+        <li>
+          <NavLink
+            to="services" // Update this to your products route
+            className={({ isActive }) =>
+              `flex items-center rounded-lg font-bold p-2 ${isActive ? 'bg-blue-400 text-white' : 'hover:bg-blue-400 hover:text-white'}`
+            }
+          >
+            <FaBox className='mr-2' /> Services 
+          </NavLink>
+        </li>
 
   
 
@@ -75,6 +85,27 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
 
         <li>
           <NavLink
+            to="sustainability" // Update this to your stores route
+            className={({ isActive }) =>
+              `flex items-center rounded-lg font-bold p-2 ${isActive ? 'bg-blue-400 text-white' : 'hover:bg-blue-400 hover:text-white'}`
+            }
+          >
+            <FaStore className='mr-2' /> Sustainability
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="career" // Update this to your stores route
+            className={({ isActive }) =>
+              `flex items-center rounded-lg font-bold p-2 ${isActive ? 'bg-blue-400 text-white' : 'hover:bg-blue-400 hover:text-white'}`
+            }
+          >
+            <FaStore className='mr-2' /> Career
+          </NavLink>
+        </li>
+
+        {/* <li>
+          <NavLink
             to="gallery" // Update this to your delivery route
             className={({ isActive }) =>
               `flex items-center rounded-lg font-bold p-2 ${isActive ? 'bg-blue-400 text-white' : 'hover:bg-blue-400 hover:text-white'}`
@@ -82,7 +113,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
           >
             <FaTruck className='mr-2' /> Gallery
           </NavLink>
-        </li>
+        </li> */}
         <li>
           <NavLink
             to="contact" // Update this to your invoices route
@@ -98,7 +129,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
         <div className=''>
         <h1 className='font-extrabold text-3xl text-gray-600 pb-4 italic'>Functionality</h1>
         <div className='flex flex-col gap-4 border p-4 border-gray-200'>
-        <li>
+        {/* <li>
           <NavLink
             to="forms-and-reports" // Update this to your products route
             className={({ isActive }) =>
@@ -107,7 +138,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
           >
             <FaBox className='mr-2' /> Forms and Reports
           </NavLink>
-        </li>   
+        </li>    */}
         
         <li>
           <NavLink

@@ -10,6 +10,11 @@ import {
   Spin,
   Upload,
   Image,
+  Select,
+  Card,
+  Row,
+  Col,
+  Tag,
 } from "antd";
 import {
   UploadOutlined,
@@ -20,19 +25,31 @@ import Swal from "sweetalert2";
 
 const { TextArea } = Input;
 
-// Color constants
+// Color constants using KAF TAR brand colors
 const COLORS = {
-  primary: "#2ecc71", // Vibrant green
-  primaryDark: "#27ae60", // Darker green
-  secondary: "#f39c12", // Yellow/orange
-  accent: "#e74c3c", // Vibrant red
-  textDark: "#2c3e50", // Dark blue/black
-  textLight: "#ecf0f1", // Light gray
-  backgroundLight: "#ffffff",
-  backgroundDark: "#34495e", // Dark slate
-  border: "#bdc3c7", // Light gray border
-  highlight: "#3498db", // Bright blue
+  primary: "#7bbf42",       // KAF TAR green
+  secondary: "#f9b414",     // KAF TAR yellow
+  tertiary: "#040404",      // KAF TAR black
+  purple: "#70308c",        // KAF TAR purple
+  white: "#ffffff",
+  border: "#e5e7eb",        // Light gray border
+  accent: "#e74c3c",        // For error/danger actions
 };
+
+const CATEGORIES = [
+  "Education",
+  "Healthcare",
+  "Government",
+  "Retail",
+  "Airports",
+  "Manufacturing",
+  "Warehouses",
+  "Financial Institutions",
+  "Construction",
+  "Real Estate",
+  "Hospitality",
+  "Energy",
+];
 
 const OurClientsModal = ({ isOpen, onClose }) => {
   const [form] = Form.useForm();
@@ -48,31 +65,38 @@ const OurClientsModal = ({ isOpen, onClose }) => {
 
       setLoading(true);
       try {
-        const response = await fetch(`${apiUrl}/home/our-clients/`);
+        // Simulate API call with demo data
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        form.setFieldsValue({
+          title: "Trusted By Industry Leaders",
+          subtitle: "We proudly serve these market segments",
+          logos: [
+            {
+              name: "Education",
+              image: "https://img.freepik.com/free-photo/front-view-stacked-books-graduation-cap-ladders-education-day_23-2149241014.jpg",
+              category: "Education",
+            },
+            {
+              name: "Healthcare",
+              image: "https://img.freepik.com/free-photo/medical-banner-with-stethoscope_23-2149611199.jpg",
+              category: "Healthcare",
+            },
+            {
+              name: "Government",
+              image: "https://img.freepik.com/premium-photo/massachusetts-state-house-boston_155769-2110.jpg",
+              category: "Government",
+            },
+          ],
+        });
+
+        // Actual API call would look like this:
+        const response = await fetch(`${apiUrl}/home/client-logos/`);
         if (!response.ok) throw new Error("Failed to fetch data");
         const data = await response.json();
         form.setFieldsValue(data);
       } catch (error) {
         message.error("Failed to load clients data");
         console.error(error);
-        // Set demo data if API fails
-        form.setFieldsValue({
-          title: "Trusted By Global Leaders",
-          clients: [
-            {
-              logo: "https://logo.clearbit.com/google.com",
-              link: "https://google.com",
-            },
-            {
-              logo: "https://logo.clearbit.com/microsoft.com",
-              link: "https://microsoft.com",
-            },
-            {
-              logo: "https://logo.clearbit.com/apple.com",
-              link: "https://apple.com",
-            },
-          ],
-        });
       } finally {
         setLoading(false);
       }
@@ -89,20 +113,24 @@ const OurClientsModal = ({ isOpen, onClose }) => {
     formData.append("category", "clients");
 
     try {
-      const response = await fetch(`${apiUrl}/images/`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error("Upload failed");
-
-      const { url } = await response.json();
-
-      const clients = form.getFieldValue("clients") || [];
-      clients[index] = { ...clients[index], logo: url };
-      form.setFieldsValue({ clients });
+      // Simulate upload
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const url = URL.createObjectURL(file);
+      
+      const logos = form.getFieldValue("logos") || [];
+      logos[index] = { ...logos[index], image: url };
+      form.setFieldsValue({ logos });
 
       return url;
+      
+      // Actual upload would look like this:
+      // const response = await fetch(`${apiUrl}/images/`, {
+      //   method: "POST",
+      //   body: formData,
+      // });
+      // if (!response.ok) throw new Error("Upload failed");
+      // const { url } = await response.json();
+      // return url;
     } catch (error) {
       message.error("Image upload failed");
       console.error(error);
@@ -118,22 +146,28 @@ const OurClientsModal = ({ isOpen, onClose }) => {
     try {
       const values = await form.validateFields();
 
-      const response = await fetch(`${apiUrl}/home/our-clients/`, {
+      // Simulate API save
+      console.log("Saving data:", values);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Actual API call would look like this:
+      const response = await fetch(`${apiUrl}/home/client-logos/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
       });
-
       if (!response.ok) throw new Error("Failed to save");
 
       Swal.fire({
-        position: "top-end",
+        position: "center",
         icon: "success",
-        title: "Our Clients Content Added Successfully",
+        title: "Clients Section Updated Successfully",
         showConfirmButton: false,
-        timer: 3000,
+        timer: 2000,
+        background: COLORS.white,
+        iconColor: COLORS.primary,
       });
       onClose();
     } catch (error) {
@@ -151,17 +185,18 @@ const OurClientsModal = ({ isOpen, onClose }) => {
       handleImageUpload(file, index);
       return false;
     },
+    accept: "image/*",
   });
 
-  const renderLogoPreview = (url) => {
-    if (!url) return null;
+  const renderLogoPreview = (imageUrl) => {
+    if (!imageUrl) return null;
     return (
       <div className="mt-2">
         <Image
-          src={url}
-          width={100}
-          height={60}
-          className="object-contain rounded border"
+          src={imageUrl}
+          width={120}
+          height={80}
+          className="object-cover rounded-md border"
           alt="Logo preview"
           style={{ borderColor: COLORS.border }}
         />
@@ -172,19 +207,28 @@ const OurClientsModal = ({ isOpen, onClose }) => {
   return (
     <Modal
       title={
-        <span className="font-bold" style={{ color: COLORS.primaryDark }}>
-          Edit Our Clients Section
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className="font-bold text-xl"
+            style={{ color: COLORS.primary }}
+          >
+            Edit Our Clients Section
+          </span>
+        </div>
       }
       open={isOpen}
       onCancel={onClose}
-      width={800}
+      width={900}
       footer={[
         <Button
           key="cancel"
           onClick={onClose}
           disabled={saving}
-          style={{ borderColor: COLORS.border }}
+          style={{
+            borderColor: COLORS.tertiary,
+            color: COLORS.tertiary,
+          }}
+          className="hover:bg-gray-50"
         >
           Cancel
         </Button>,
@@ -196,7 +240,7 @@ const OurClientsModal = ({ isOpen, onClose }) => {
           disabled={uploading}
           style={{
             backgroundColor: COLORS.primary,
-            borderColor: COLORS.primaryDark,
+            borderColor: COLORS.primary,
           }}
           className="hover:opacity-90"
         >
@@ -205,69 +249,126 @@ const OurClientsModal = ({ isOpen, onClose }) => {
       ]}
       destroyOnClose
       className="rounded-lg overflow-hidden"
-      bodyStyle={{ padding: 0 }}
+      bodyStyle={{ padding: "24px" }}
     >
       <Spin spinning={loading}>
-        <Form form={form} layout="vertical" className="p-6">
-          <Form.Item
-            name="title"
-            label={
-              <span
-                className="font-semibold"
-                style={{ color: COLORS.textDark }}
-              >
-                Section Title
-              </span>
-            }
-            rules={[{ required: true, message: "Please enter a title" }]}
-          >
-            <Input
-              placeholder="Trusted By Global Leaders"
-              className="rounded-lg border-gray-300 hover:border-green-500 focus:border-green-500"
-            />
-          </Form.Item>
+        <Form form={form} layout="vertical">
+          <div className="grid grid-cols-1 gap-4 mb-6">
+            <Form.Item
+              name="title"
+              label={
+                <span
+                  className="font-semibold text-lg"
+                  style={{ color: COLORS.tertiary }}
+                >
+                  Section Title
+                </span>
+              }
+              rules={[{ required: true, message: "Please enter a title" }]}
+            >
+              <Input
+                placeholder="Trusted By Industry Leaders"
+                className="h-12 text-lg"
+                style={{ borderColor: COLORS.border }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="subtitle"
+              label={
+                <span
+                  className="font-semibold text-lg"
+                  style={{ color: COLORS.tertiary }}
+                >
+                  Section Subtitle
+                </span>
+              }
+            >
+              <Input
+                placeholder="We proudly serve these market segments"
+                className="h-12 text-lg"
+                style={{ borderColor: COLORS.border }}
+              />
+            </Form.Item>
+          </div>
 
           <Divider
             orientation="left"
-            className="font-semibold"
-            style={{ color: COLORS.primaryDark, borderColor: COLORS.border }}
+            className="font-semibold text-lg"
+            style={{ color: COLORS.primary, borderColor: COLORS.border }}
           >
-            Client Logos
+            Client Logos & Categories
           </Divider>
 
-          <Form.List name="clients">
+          <Form.List name="logos">
             {(fields, { add, remove }) => (
               <div className="space-y-6">
                 {fields.map(({ key, name, ...restField }, index) => (
-                  <div
+                  <Card
                     key={key}
-                    className="border-b pb-4"
-                    style={{ borderColor: COLORS.border }}
+                    className="border-0 shadow-sm"
+                    bodyStyle={{ padding: "16px" }}
                   >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Form.Item
                         {...restField}
-                        name={[name, "logo"]}
+                        name={[name, "name"]}
                         label={
-                          <span
-                            className="font-medium"
-                            style={{ color: COLORS.textDark }}
-                          >
-                            Logo URL
+                          <span style={{ color: COLORS.tertiary }}>
+                            Client Name
+                          </span>
+                        }
+                        rules={[
+                          { required: true, message: "Please enter client name" },
+                        ]}
+                      >
+                        <Input
+                          placeholder="Client Name"
+                          style={{ borderColor: COLORS.border }}
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        {...restField}
+                        name={[name, "category"]}
+                        label={
+                          <span style={{ color: COLORS.tertiary }}>
+                            Industry Category
                           </span>
                         }
                         rules={[
                           {
                             required: true,
-                            message: "Please provide logo URL",
+                            message: "Please select category",
                           },
+                        ]}
+                      >
+                        <Select
+                          placeholder="Select category"
+                          style={{ borderColor: COLORS.border }}
+                          options={CATEGORIES.map(cat => ({
+                            value: cat,
+                            label: cat,
+                          }))}
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        {...restField}
+                        name={[name, "image"]}
+                        label={
+                          <span style={{ color: COLORS.tertiary }}>
+                            Logo/Image
+                          </span>
+                        }
+                        rules={[
+                          { required: true, message: "Please upload an image" },
                         ]}
                       >
                         <div>
                           <Space.Compact className="w-full">
                             <Input
-                              placeholder="https://example.com/logo.png"
-                              className="rounded-l-lg"
+                              placeholder="Image URL"
                               style={{ borderColor: COLORS.border }}
                             />
                             <Upload {...uploadProps(index)}>
@@ -277,36 +378,18 @@ const OurClientsModal = ({ isOpen, onClose }) => {
                                 style={{
                                   backgroundColor: COLORS.secondary,
                                   borderColor: COLORS.secondary,
-                                  color: "white",
+                                  color: COLORS.tertiary,
                                 }}
-                                className="hover:opacity-90 rounded-r-lg"
+                                className="hover:opacity-90"
                               >
                                 Upload
                               </Button>
                             </Upload>
                           </Space.Compact>
                           {renderLogoPreview(
-                            form.getFieldValue(["clients", index, "logo"])
+                            form.getFieldValue(["logos", index, "image"])
                           )}
                         </div>
-                      </Form.Item>
-                      <Form.Item
-                        {...restField}
-                        name={[name, "link"]}
-                        label={
-                          <span
-                            className="font-medium"
-                            style={{ color: COLORS.textDark }}
-                          >
-                            Client Website (optional)
-                          </span>
-                        }
-                      >
-                        <Input
-                          placeholder="https://client-website.com"
-                          className="rounded-lg"
-                          style={{ borderColor: COLORS.border }}
-                        />
                       </Form.Item>
                     </div>
                     <div className="flex justify-end mt-2">
@@ -315,25 +398,25 @@ const OurClientsModal = ({ isOpen, onClose }) => {
                         danger
                         icon={<DeleteOutlined />}
                         onClick={() => remove(name)}
-                        style={{ color: COLORS.accent }}
-                        className="hover:bg-red-50"
+                        style={{ color: COLORS.purple }}
+                        className="hover:bg-purple-50"
                       />
                     </div>
-                  </div>
+                  </Card>
                 ))}
                 <Button
                   type="dashed"
-                  onClick={() => add({ logo: "", link: "" })}
+                  onClick={() => add({ name: "", category: "", image: "" })}
                   icon={<PlusOutlined />}
                   block
                   disabled={uploading}
                   style={{
                     borderColor: COLORS.primary,
-                    color: COLORS.primaryDark,
+                    color: COLORS.primary,
                   }}
-                  className="hover:border-green-600 hover:text-green-600"
+                  className="hover:bg-green-50 h-10"
                 >
-                  Add Client
+                  Add New Client
                 </Button>
               </div>
             )}

@@ -22,14 +22,16 @@ const AboutEditor = () => {
     <div className='flex gap-20 items-center justify-between p-20'>
       {/* Buttons Section */}
       <div className='flex flex-col gap-10'>
-        <button className="btn btn-primary" onClick={() => setAbout1Open(true)}>About 1</button>
-        <button className="btn btn-primary" onClick={() => setAbout2Open(true)}>About 2</button>
+        {/* <button className="btn btn-primary" onClick={() => setAbout1Open(true)}>About 1</button> */}
+        <button className="btn btn-primary" onClick={() => setAbout1Open(true)}>Our Journery</button>
+        <button className="btn btn-primary" onClick={() => setAbout2Open(true)}>Core And Values</button>
         {/* <button className="btn btn-primary" onClick={() => setFAQOpen(true)}>Core Values</button> */}
 
-        <button className="btn btn-primary" onClick={() => setMessageOpen(true)}>Message</button>
+        {/* <button className="btn btn-primary" onClick={() => setMessageOpen(true)}>Message</button> */}
+        <button className="btn btn-primary" onClick={() => setMessageOpen(true)}>Quality Policy</button>
 
-        <button className="btn btn-primary" onClick={() => setTeamOpen(true)}>Team</button>
-        <button className="btn btn-primary" onClick={() => setWhyUsOpen(true)}>Why Us</button>
+        {/* <button className="btn btn-primary" onClick={() => setTeamOpen(true)}>Team</button> */}
+        {/* <button className="btn btn-primary" onClick={() => setWhyUsOpen(true)}>Why Us</button> */}
       </div>
 
       {/* Mockup Browser Section */}

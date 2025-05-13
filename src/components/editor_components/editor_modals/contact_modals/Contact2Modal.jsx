@@ -1,373 +1,516 @@
-import React, { useState, useEffect } from "react";
-import { HexColorPicker } from "react-colorful";
-import { FaPhone, FaMapMarkerAlt, FaEnvelope, FaClock, FaPlus, FaTimes } from "react-icons/fa";
+import React, { useState, useEffect } from 'react';
+import { Modal, Form, Input, Button, message, Card, Divider, Space, Spin, Tag, Upload, Select } from 'antd';
+import { PlusOutlined, DeleteOutlined, PhoneOutlined, MailOutlined, EnvironmentOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { HexColorPicker } from 'react-colorful';
+import Swal from 'sweetalert2';
+
+const { TextArea } = Input;
+
+// KAF TAR company colors
+const COLORS = {
+  primary: '#7bbf42', // Vibrant green
+  secondary: '#f9b414', // Yellow
+  dark: '#040404', // Dark text
+  accent: '#70308c', // Purple
+  light: '#ffffff', // White
+};
 
 const Contact2Modal = ({ isOpen, onClose }) => {
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [bgColor, setBgColor] = useState('#7bbf42');
+  const [textColor, setTextColor] = useState('#ffffff');
+  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
+  const [showTextColorPicker, setShowTextColorPicker] = useState(false);
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  const sampleData = {
-    title: "Contact Us",
-    subtitle: "Reach Out To Us",
-    phoneNumbers: [
-      "Main office: +880 1234-567890"
-    ],
-    email: "Pagedone1234@gmail.com",
-    addresses: [
-      {
-        heading: "Headquarters",
-        details: "Address 1"
-      }
-    ],
-    businessHours: [],
-    socialMedia: [],
-    imageUrl: "",
-    bgColor: "#2ecc71", // Vibrant green
-    textColor: "#ffffff", // White
-    accentColor: "#f39c12" // Orange/yellow
-  };
-
-  const [formData, setFormData] = useState(() => ({
-    ...sampleData,
-    phoneNumbers: [],
-    addresses: [],
-    businessHours: [],
-    socialMedia: []
-  }));
+  // Social media platforms
+  const socialMediaOptions = [
+    { value: 'linkedin', label: 'LinkedIn', icon: 'linkedin' },
+    { value: 'twitter', label: 'Twitter', icon: 'twitter' },
+    { value: 'instagram', label: 'Instagram', icon: 'instagram' },
+    { value: 'facebook', label: 'Facebook', icon: 'facebook' },
+    { value: 'youtube', label: 'YouTube', icon: 'youtube' },
+  ];
 
   useEffect(() => {
-    if (isOpen) {
-      fetch(`${apiUrl}/contact/contact2/`)
-        .then((res) => res.json())
-        .then((data) => {
-          setFormData({
-            ...sampleData,
-            ...data,
-            phoneNumbers: data.phoneNumbers || [],
-            addresses: data.addresses || [],
-            businessHours: data.businessHours || [],
-            socialMedia: data.socialMedia || []
-          });
-        })
-        .catch(() => {
-          setFormData(sampleData);
-        });
-    }
-  }, [apiUrl, isOpen]);
+    const fetchData = async () => {
+      if (!isOpen) return;
+      
+      setLoading(true);
+      try {
+        const response = await fetch(`${apiUrl}/contact/contact2/`);
+        if (!response.ok) throw new Error('Failed to fetch data');
+        
+        // Sample data structure if API is not ready
+        const data = await response.json() || {
+          sectionTitle: "Connect With Us",
+          sectionSubtitle: "We're always here to help with your facility management needs",
+          contactPoints: [
+            {
+              type: "Phone",
+              value: "+966 56 705 5580",
+              icon: "phone",
+              description: "Available 24/7 for emergency services"
+            },
+            {
+              type: "Email",
+              value: "info@kaftaroperations.com",
+              icon: "email",
+              description: "General inquiries and support"
+            },
+            {
+              type: "Address",
+              value: "9191 Al Olaya Dist. Riyadh 12611, Saudi Arabia",
+              icon: "location",
+              description: "Our headquarters location"
+            },
+            {
+              type: "Working Hours",
+              value: "Sunday - Thursday: 8:00 AM - 5:00 PM",
+              icon: "clock",
+              description: "Standard business hours"
+            }
+          ],
+          socialMedia: [
+            {
+              platform: "LinkedIn",
+              url: "https://linkedin.com/company/kaftar",
+              icon: "linkedin"
+            },
+            {
+              platform: "Twitter",
+              url: "https://twitter.com/kaftar",
+              icon: "twitter"
+            },
+            {
+              platform: "Instagram",
+              url: "https://instagram.com/kaftar",
+              icon: "instagram"
+            }
+          ],
+          bgColor: "#7bbf42",
+          textColor: "#ffffff"
+        };
+        
+        form.setFieldsValue(data);
+        setBgColor(data.bgColor || '#7bbf42');
+        setTextColor(data.textColor || '#ffffff');
+      } catch (error) {
+        message.error('Failed to load contact data');
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleColorChange = (color, field) => {
-    setFormData(prev => ({ ...prev, [field]: color }));
-  };
+    fetchData();
+  }, [isOpen, apiUrl, form]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleDynamicFieldChange = (key, index, field, value) => {
-    const updatedFields = [...(formData[key] || [])];
-    if (typeof updatedFields[index] === 'object') {
-      updatedFields[index] = { ...updatedFields[index], [field]: value };
-    } else {
-      updatedFields[index] = value;
-    }
-    setFormData(prev => ({ ...prev, [key]: updatedFields }));
-  };
-
-  const addField = (key, defaultValue = "") => {
-    const isObject = typeof defaultValue === 'object';
-    setFormData(prev => ({
-      ...prev,
-      [key]: [...(prev[key] || []), isObject ? { ...defaultValue } : defaultValue]
-    }));
-  };
-
-  const removeField = (key, index) => {
-    setFormData(prev => ({
-      ...prev,
-      [key]: (prev[key] || []).filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSave = async () => {
+    setSaving(true);
     try {
-      await fetch(`${apiUrl}/contact/contact2/`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+      const values = await form.validateFields();
+      const updatedData = {
+        ...values,
+        bgColor,
+        textColor
+      };
+      
+      const response = await fetch(`${apiUrl}/contact/contact2/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!response.ok) throw new Error('Failed to save');
+      
+      Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Contact Section Updated",
+        showConfirmButton: false,
+        timer: 2000,
+        background: COLORS.light,
+        color: COLORS.dark,
       });
       onClose();
     } catch (error) {
-      console.error("Error saving data:", error);
+      message.error('Failed to save changes');
+      console.error(error);
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (!isOpen) return null;
+  const getIconComponent = (icon) => {
+    switch(icon) {
+      case 'phone': return <PhoneOutlined />;
+      case 'email': return <MailOutlined />;
+      case 'location': return <EnvironmentOutlined />;
+      case 'clock': return <ClockCircleOutlined />;
+      default: return null;
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border-t-8" style={{ borderTopColor: formData.bgColor }}>
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold text-emerald-500">
-              Edit Contact Information
-            </h2>
-            <button 
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              <FaTimes size={24} />
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Header Section */}
-            <div className="space-y-4 p-4 rounded-lg border-2 bg-emerald-50 border-emerald-500">
-              <div>
-                <label className="block font-medium mb-1">Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title || ''}
-                  onChange={handleChange}
-                  className="w-full p-3 rounded-lg border-2 border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+    <Modal
+      title={
+        <div className="flex items-center">
+          <span className="text-2xl font-bold" style={{ color: COLORS.dark }}>
+            Edit Contact Section
+          </span>
+        </div>
+      }
+      open={isOpen}
+      onCancel={onClose}
+      width={1000}
+      footer={[
+        <Button 
+          key="cancel" 
+          onClick={onClose} 
+          disabled={saving} 
+          className="px-6 h-10 rounded-lg font-medium"
+          style={{ 
+            borderColor: COLORS.dark, 
+            color: COLORS.dark,
+            backgroundColor: COLORS.light
+          }}
+        >
+          Cancel
+        </Button>,
+        <Button 
+          key="save" 
+          type="primary" 
+          onClick={handleSave}
+          loading={saving}
+          style={{ 
+            backgroundColor: COLORS.primary, 
+            borderColor: COLORS.primary,
+            color: COLORS.light
+          }}
+          className="px-6 h-10 rounded-lg font-medium hover:opacity-90"
+        >
+          {saving ? 'Saving...' : 'Save Changes'}
+        </Button>,
+      ]}
+      destroyOnClose
+      className="rounded-xl overflow-hidden"
+      bodyStyle={{ padding: '24px' }}
+    >
+      <Spin spinning={loading}>
+        <Form form={form} layout="vertical" className="space-y-6">
+          {/* Section Header */}
+          <Card 
+            bordered={false} 
+            className="rounded-xl shadow-sm border-0 bg-gradient-to-r from-[#f9f9f9] to-white"
+          >
+            <div className="space-y-4">
+              <Form.Item
+                name="sectionTitle"
+                label={<span className="font-semibold" style={{ color: COLORS.dark }}>Section Title</span>}
+                rules={[{ required: true, message: 'Please enter section title' }]}
+              >
+                <Input 
+                  placeholder="Connect With Us" 
+                  className="rounded-lg hover:border-green-500 focus:border-green-500"
                 />
-              </div>
+              </Form.Item>
 
-              <div>
-                <label className="block font-medium mb-1">Subtitle</label>
-                <textarea
-                  name="subtitle"
-                  value={formData.subtitle || ''}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full p-3 rounded-lg border-2 border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              <Form.Item
+                name="sectionSubtitle"
+                label={<span className="font-semibold" style={{ color: COLORS.dark }}>Section Subtitle</span>}
+                rules={[{ required: true, message: 'Please enter section subtitle' }]}
+              >
+                <Input 
+                  placeholder="We're always here to help with your facility management needs" 
+                  className="rounded-lg hover:border-green-500 focus:border-green-500"
                 />
-              </div>
+              </Form.Item>
             </div>
+          </Card>
 
-            {/* Contact Information Sections */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Phone Numbers */}
-              <div className="space-y-4 p-4 rounded-lg border-2 border-emerald-500">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold flex items-center text-emerald-500">
-                    <FaPhone className="mr-2 text-emerald-500" />
-                    Phone Numbers
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => addField("phoneNumbers", "")}
-                    className="flex items-center text-sm px-3 py-1 rounded-full border-2 border-emerald-500 bg-emerald-100 text-emerald-500 hover:bg-emerald-200 transition-colors"
-                  >
-                    <FaPlus className="mr-1" /> Add
-                  </button>
-                </div>
+          {/* Contact Points */}
+          <Card 
+            title={<span className="font-semibold" style={{ color: COLORS.dark }}>Contact Points</span>}
+            bordered={false} 
+            className="rounded-xl shadow-sm border-0 bg-gradient-to-r from-[#f9f9f9] to-white"
+          >
+            <Form.List name="contactPoints">
+              {(fields, { add, remove }) => (
+                <div className="space-y-4">
+                  {fields.map(({ key, name, ...restField }) => (
+                    <div key={key} className="border border-gray-200 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-medium" style={{ color: COLORS.dark }}>
+                          Contact Point {name + 1}
+                        </h4>
+                        <Button
+                          danger
+                          type="text"
+                          icon={<DeleteOutlined />}
+                          onClick={() => remove(name)}
+                          style={{ color: '#ff4d4f' }}
+                        />
+                      </div>
 
-                {(formData.phoneNumbers || []).map((phone, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      value={phone}
-                      onChange={(e) => handleDynamicFieldChange("phoneNumbers", index, index, e.target.value)}
-                      className="flex-1 p-2 rounded-lg border-2 border-emerald-500"
-                      placeholder="e.g., Main office: +880 1234-567890"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeField("phoneNumbers", index)}
-                      className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 border-2 border-red-500"
-                    >
-                      <FaTimes />
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <div className="md:col-span-3">
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'type']}
+                            label={<span className="font-medium" style={{ color: COLORS.dark }}>Type</span>}
+                            rules={[{ required: true, message: 'Please select type' }]}
+                          >
+                            <Select 
+                              placeholder="Select type" 
+                              className="w-full"
+                            >
+                              <Select.Option value="Phone">Phone</Select.Option>
+                              <Select.Option value="Email">Email</Select.Option>
+                              <Select.Option value="Address">Address</Select.Option>
+                              <Select.Option value="Working Hours">Working Hours</Select.Option>
+                            </Select>
+                          </Form.Item>
+                        </div>
 
-              {/* Email */}
-              <div className="space-y-4 p-4 rounded-lg border-2 border-emerald-500">
-                <h3 className="text-xl font-semibold flex items-center text-emerald-500">
-                  <FaEnvelope className="mr-2 text-emerald-500" />
-                  Email Address
-                </h3>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email || ''}
-                  onChange={handleChange}
-                  className="w-full p-3 rounded-lg border-2 border-emerald-500"
-                  placeholder="e.g., info@company.com"
-                />
-              </div>
-            </div>
+                        <div className="md:col-span-3">
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'icon']}
+                            label={<span className="font-medium" style={{ color: COLORS.dark }}>Icon</span>}
+                            rules={[{ required: true, message: 'Please select icon' }]}
+                          >
+                            <Select 
+                              placeholder="Select icon" 
+                              className="w-full"
+                            >
+                              <Select.Option value="phone">Phone</Select.Option>
+                              <Select.Option value="email">Email</Select.Option>
+                              <Select.Option value="location">Location</Select.Option>
+                              <Select.Option value="clock">Clock</Select.Option>
+                            </Select>
+                          </Form.Item>
+                        </div>
 
-            {/* Addresses */}
-            <div className="space-y-4 p-4 rounded-lg border-2 border-emerald-500">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold flex items-center text-emerald-500">
-                  <FaMapMarkerAlt className="mr-2 text-emerald-500" />
-                  Addresses
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => addField("addresses", { heading: "", details: "" })}
-                  className="flex items-center text-sm px-3 py-1 rounded-full border-2 border-emerald-500 bg-emerald-100 text-emerald-500 hover:bg-emerald-200 transition-colors"
-                >
-                  <FaPlus className="mr-1" /> Add
-                </button>
-              </div>
+                        <div className="md:col-span-6 space-y-4">
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'value']}
+                            label={<span className="font-medium" style={{ color: COLORS.dark }}>Value</span>}
+                            rules={[{ required: true, message: 'Please enter value' }]}
+                          >
+                            <Input 
+                              placeholder="+966 56 705 5580" 
+                              className="rounded-lg hover:border-green-500 focus:border-green-500"
+                            />
+                          </Form.Item>
 
-              {(formData.addresses || []).map((address, index) => (
-                <div key={index} className="space-y-2 p-3 rounded-lg border-2 border-emerald-500 bg-emerald-50">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-medium">Address {index + 1}</h4>
-                    <button
-                      type="button"
-                      onClick={() => removeField("addresses", index)}
-                      className="p-1 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 border-2 border-red-500"
-                    >
-                      <FaTimes />
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    value={address?.heading || ''}
-                    onChange={(e) => handleDynamicFieldChange("addresses", index, "heading", e.target.value)}
-                    className="w-full p-2 rounded-lg border-2 border-emerald-500 mb-2"
-                    placeholder="Heading (e.g., Headquarters)"
-                  />
-                  <textarea
-                    value={address?.details || ''}
-                    onChange={(e) => handleDynamicFieldChange("addresses", index, "details", e.target.value)}
-                    rows={2}
-                    className="w-full p-2 rounded-lg border-2 border-emerald-500"
-                    placeholder="Full address details"
-                  />
-                </div>
-              ))}
-            </div>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'description']}
+                            label={<span className="font-medium" style={{ color: COLORS.dark }}>Description</span>}
+                            rules={[{ required: true, message: 'Please enter description' }]}
+                          >
+                            <Input 
+                              placeholder="Available 24/7 for emergency services" 
+                              className="rounded-lg hover:border-green-500 focus:border-green-500"
+                            />
+                          </Form.Item>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
 
-            {/* Business Hours */}
-            <div className="space-y-4 p-4 rounded-lg border-2 border-emerald-500">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold flex items-center text-emerald-500">
-                  <FaClock className="mr-2 text-emerald-500" />
-                  Business Hours
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => addField("businessHours", "")}
-                  className="flex items-center text-sm px-3 py-1 rounded-full border-2 border-emerald-500 bg-emerald-100 text-emerald-500 hover:bg-emerald-200 transition-colors"
-                >
-                  <FaPlus className="mr-1" /> Add
-                </button>
-              </div>
-
-              {(formData.businessHours || []).map((hours, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={hours}
-                    onChange={(e) => handleDynamicFieldChange("businessHours", index, index, e.target.value)}
-                    className="flex-1 p-2 rounded-lg border-2 border-emerald-500"
-                    placeholder="e.g., Mon-Fri: 9AM-5PM"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeField("businessHours", index)}
-                    className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 border-2 border-red-500"
-                  >
-                    <FaTimes />
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* Color Pickers and Image */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Background Color */}
-              <div className="space-y-2">
-                <label className="block font-medium">Background Color</label>
-                <div className="flex items-center space-x-4">
-                  <HexColorPicker
-                    color={formData.bgColor}
-                    onChange={(color) => handleColorChange(color, "bgColor")}
-                    className="!w-full !h-32 border-2 border-emerald-500 rounded-lg"
-                  />
-                  <input
-                    type="text"
-                    value={formData.bgColor || ''}
-                    onChange={(e) => handleColorChange(e.target.value, "bgColor")}
-                    className="w-24 p-2 rounded-lg border-2 border-emerald-500"
-                  />
-                </div>
-              </div>
-
-              {/* Text Color */}
-              <div className="space-y-2">
-                <label className="block font-medium">Text Color</label>
-                <div className="flex items-center space-x-4">
-                  <HexColorPicker
-                    color={formData.textColor}
-                    onChange={(color) => handleColorChange(color, "textColor")}
-                    className="!w-full !h-32 border-2 border-emerald-500 rounded-lg"
-                  />
-                  <input
-                    type="text"
-                    value={formData.textColor || ''}
-                    onChange={(e) => handleColorChange(e.target.value, "textColor")}
-                    className="w-24 p-2 rounded-lg border-2 border-emerald-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Image URL */}
-            <div className="space-y-2">
-              <label className="block font-medium">Image URL</label>
-              <input
-                type="url"
-                name="imageUrl"
-                value={formData.imageUrl || ''}
-                onChange={handleChange}
-                className="w-full p-3 rounded-lg border-2 border-emerald-500"
-                placeholder="https://example.com/image.jpg"
-              />
-              {formData.imageUrl && (
-                <div className="mt-2">
-                  <img 
-                    src={formData.imageUrl} 
-                    alt="Preview" 
-                    className="max-h-40 rounded-lg object-cover border-2 border-emerald-500"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
+                  <Button
+                    type="dashed"
+                    onClick={() => add({
+                      type: 'Phone',
+                      icon: 'phone',
+                      value: '',
+                      description: ''
+                    })}
+                    icon={<PlusOutlined />}
+                    block
+                    className="mt-2 rounded-lg h-10"
+                    style={{ 
+                      borderColor: COLORS.accent,
+                      color: COLORS.accent,
+                      backgroundColor: `${COLORS.accent}10` // 10% opacity
                     }}
-                  />
+                  >
+                    Add Contact Point
+                  </Button>
                 </div>
               )}
-            </div>
+            </Form.List>
+          </Card>
 
-            {/* Form Actions */}
-            <div className="flex justify-end space-x-4 pt-6">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-6 py-3 rounded-lg font-medium border-2 border-emerald-500 text-emerald-500 hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-6 py-3 rounded-lg font-medium text-white bg-emerald-500 hover:bg-emerald-600 transition-colors border-2 border-emerald-500"
-              >
-                Save Changes
-              </button>
+          {/* Social Media */}
+          <Card 
+            title={<span className="font-semibold" style={{ color: COLORS.dark }}>Social Media Links</span>}
+            bordered={false} 
+            className="rounded-xl shadow-sm border-0 bg-gradient-to-r from-[#f9f9f9] to-white"
+          >
+            <Form.List name="socialMedia">
+              {(fields, { add, remove }) => (
+                <div className="space-y-4">
+                  {fields.map(({ key, name, ...restField }) => (
+                    <div key={key} className="border border-gray-200 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-medium" style={{ color: COLORS.dark }}>
+                          Social Media {name + 1}
+                        </h4>
+                        <Button
+                          danger
+                          type="text"
+                          icon={<DeleteOutlined />}
+                          onClick={() => remove(name)}
+                          style={{ color: '#ff4d4f' }}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <div className="md:col-span-4">
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'platform']}
+                            label={<span className="font-medium" style={{ color: COLORS.dark }}>Platform</span>}
+                            rules={[{ required: true, message: 'Please select platform' }]}
+                          >
+                            <Select 
+                              placeholder="Select platform" 
+                              className="w-full"
+                            >
+                              {socialMediaOptions.map(platform => (
+                                <Select.Option key={platform.value} value={platform.value}>
+                                  {platform.label}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                        </div>
+
+                        <div className="md:col-span-8">
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'url']}
+                            label={<span className="font-medium" style={{ color: COLORS.dark }}>URL</span>}
+                            rules={[
+                              { required: true, message: 'Please enter URL' },
+                              { type: 'url', message: 'Please enter a valid URL' }
+                            ]}
+                          >
+                            <Input 
+                              placeholder="https://linkedin.com/company/kaftar" 
+                              className="rounded-lg hover:border-green-500 focus:border-green-500"
+                            />
+                          </Form.Item>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <Button
+                    type="dashed"
+                    onClick={() => add({
+                      platform: 'linkedin',
+                      url: ''
+                    })}
+                    icon={<PlusOutlined />}
+                    block
+                    className="mt-2 rounded-lg h-10"
+                    style={{ 
+                      borderColor: COLORS.secondary,
+                      color: COLORS.secondary,
+                      backgroundColor: `${COLORS.secondary}10` // 10% opacity
+                    }}
+                  >
+                    Add Social Media Link
+                  </Button>
+                </div>
+              )}
+            </Form.List>
+          </Card>
+
+          {/* Design Settings */}
+          <Card 
+            title={<span className="font-semibold" style={{ color: COLORS.dark }}>Design Settings</span>}
+            bordered={false} 
+            className="rounded-xl shadow-sm border-0 bg-gradient-to-r from-[#f9f9f9] to-white"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-semibold mb-3" style={{ color: COLORS.dark }}>Background Color</h4>
+                <div className="flex items-center gap-4">
+                  <div 
+                    className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-300 hover:border-green-500 transition-all"
+                    style={{ backgroundColor: bgColor }}
+                    onClick={() => setShowBgColorPicker(!showBgColorPicker)}
+                  />
+                  <Input 
+                    value={bgColor}
+                    onChange={(e) => setBgColor(e.target.value)}
+                    className="rounded-lg hover:border-green-500 focus:border-green-500"
+                  />
+                </div>
+                {showBgColorPicker && (
+                  <div className="mt-3 p-3 bg-white rounded-lg shadow-md border border-gray-200">
+                    <HexColorPicker color={bgColor} onChange={setBgColor} />
+                    <Button 
+                      onClick={() => setShowBgColorPicker(false)}
+                      className="mt-2 w-full rounded-lg"
+                      style={{ 
+                        backgroundColor: COLORS.primary, 
+                        color: COLORS.light,
+                        borderColor: COLORS.primary
+                      }}
+                    >
+                      Done
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-3" style={{ color: COLORS.dark }}>Text Color</h4>
+                <div className="flex items-center gap-4">
+                  <div 
+                    className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-300 hover:border-green-500 transition-all"
+                    style={{ backgroundColor: textColor }}
+                    onClick={() => setShowTextColorPicker(!showTextColorPicker)}
+                  />
+                  <Input 
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="rounded-lg hover:border-green-500 focus:border-green-500"
+                  />
+                </div>
+                {showTextColorPicker && (
+                  <div className="mt-3 p-3 bg-white rounded-lg shadow-md border border-gray-200">
+                    <HexColorPicker color={textColor} onChange={setTextColor} />
+                    <Button 
+                      onClick={() => setShowTextColorPicker(false)}
+                      className="mt-2 w-full rounded-lg"
+                      style={{ 
+                        backgroundColor: COLORS.primary, 
+                        color: COLORS.light,
+                        borderColor: COLORS.primary
+                      }}
+                    >
+                      Done
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          </Card>
+        </Form>
+      </Spin>
+    </Modal>
   );
 };
 

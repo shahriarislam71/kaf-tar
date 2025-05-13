@@ -1,459 +1,466 @@
-import React, { useState, useEffect } from "react";
-import { HexColorPicker } from "react-colorful";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from 'react';
+import { Modal, Form, Input, Button, message, Select, Divider, TimePicker, Spin, Card } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { HexColorPicker } from 'react-colorful';
+import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
 
-// Color scheme constants
-const COLORS = {
-  primary: "#2E8B57", // Green
-  primaryLight: "#3CB371", // Lighter Green
-  primaryDark: "#1E5A3A", // Darker Green
-  secondary: "#FFD700", // Gold/Yellow
-  secondaryLight: "#FFEC8B", // Lighter Yellow
-  secondaryDark: "#FFC125", // Darker Yellow
-  accent: "#FF7F50", // Coral/Orange
-  lightGray: "#F8F8F8",
-  darkGray: "#2D2D2D",
-  white: "#FFFFFF",
-  black: "#000000"
-};
+const { TextArea } = Input;
+const { Option } = Select;
 
-const GRADIENTS = {
-  primary: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.primaryLight} 100%)`,
-  secondary: `linear-gradient(135deg, ${COLORS.secondary} 0%, ${COLORS.secondaryLight} 100%)`,
-  dark: `linear-gradient(135deg, ${COLORS.darkGray} 0%, ${COLORS.black} 100%)`
+// KAF TAR Brand Colors
+const COLORS = {
+  primary: '#7bbf42',       // Vibrant green
+  primaryDark: '#5a9e2d',   // Darker green
+  secondary: '#f9b414',     // Yellow
+  accent: '#70308c',        // Purple
+  textDark: '#040404',      // Dark black
+  textLight: '#ffffff',     // White
+  backgroundLight: '#ffffff',
+  border: '#e0e0e0',       // Light gray border
 };
 
 const Contact1Modal = ({ isOpen, onClose }) => {
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [colorPicker, setColorPicker] = useState(null);
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  const [formData, setFormData] = useState({
-    header: "Get in Touch With Us",
-    subHeader: "Our team is ready to assist you with any inquiries or partnership opportunities",
-    buttonText: "Send Us a Message",
-    buttonLink: "#contact-form",
-    email: "contact@stech.com",
-    phone: "+880 1234-567890",
-    bgColor: COLORS.white,
-    textColor: COLORS.darkGray,
-    locations: [
-      {
-        country: "Bangladesh HQ",
-        address: "123 Business Avenue, Dhaka 1212",
-        imgSrc: "https://images.unsplash.com/photo-1558002038-1055907df827?w=800&auto=format&fit=crop&q=60",
-        phone: "+880 1234-567890",
-        maplink: "https://maps.google.com/maps?q=dhaka"
-      },
-      {
-        country: "UAE Office",
-        address: "456 Trade Center, Dubai",
-        imgSrc: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&auto=format&fit=crop&q=60",
-        phone: "+971 1234-567890",
-        maplink: "https://maps.google.com/maps?q=dubai"
-      }
-    ]
-  });
+  // Sample services for dropdown
+  const serviceOptions = [
+    'Facility Management',
+    'Manpower Services',
+    'Cleaning Services',
+    'Technical Maintenance',
+    'Logistics Support',
+    'HVAC Maintenance',
+    'Electrical Services',
+    'Other'
+  ];
 
   useEffect(() => {
-    if (isOpen) {
-      fetch(`${apiUrl}/contact/contact1/`)
-        .then((res) => res.json())
-        .then((data) => {
-          setFormData(data);
-        })
-        .catch((error) => console.error("Error fetching data:", error));
-    }
-  }, [apiUrl, isOpen]);
+    const fetchData = async () => {
+      if (!isOpen) return;
 
-  const handleBgColorChange = (color) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      bgColor: color,
-    }));
-  };
-
-  const handleTextColorChange = (color) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      textColor: color,
-    }));
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleLocationChange = (index, field, value) => {
-    const updatedLocations = [...formData.locations];
-    updatedLocations[index][field] = value;
-    setFormData((prevData) => ({
-      ...prevData,
-      locations: updatedLocations,
-    }));
-  };
-
-  const handleAddLocation = () => {
-    setFormData((prevData) => ({
-      ...prevData,
-      locations: [
-        ...prevData.locations,
-        { 
-          country: "", 
-          address: "", 
-          imgSrc: "",
-          phone: "",
-          maplink: ""
-        },
-      ],
-    }));
-  };
-
-  const handleRemoveLocation = (index) => {
-    const updatedLocations = formData.locations.filter(
-      (_, locIndex) => locIndex !== index
-    );
-    setFormData((prevData) => ({
-      ...prevData,
-      locations: updatedLocations,
-    }));
-  };
-
-  const handleImageUpload = (index, file) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const updatedLocations = [...formData.locations];
-      updatedLocations[index].imgSrc = reader.result;
-      setFormData((prevData) => ({
-        ...prevData,
-        locations: updatedLocations,
-      }));
+      setLoading(true);
+      try {
+        const response = await fetch(`${apiUrl}/contact/contact1/`);
+        if (!response.ok) throw new Error("Failed to fetch data");
+        const data = await response.json();
+        form.setFieldsValue(data);
+      } catch (error) {
+        console.error('Error fetching contact data:', error);
+        // Set default values if API fails
+        form.setFieldsValue({
+          sectionTitle: "Get In Touch",
+          sectionSubtitle: "We're ready to assist you with your facility management needs",
+          contactInfo: {
+            phone: "+966 56 705 5580",
+            email: "info@kaftaroperations.com",
+            address: "9191 Al Olaya Dist. Riyadh 12611, Saudi Arabia"
+          },
+          formFields: [
+            { name: "fullName", label: "Full Name", type: "text", required: true },
+            { name: "email", label: "Email Address", type: "email", required: true },
+            { name: "phone", label: "Phone Number", type: "tel" },
+            { 
+              name: "serviceInterest", 
+              label: "Service Interest", 
+              type: "select", 
+              options: serviceOptions 
+            },
+            { name: "message", label: "Your Message", type: "textarea", required: true }
+          ],
+          workingHours: "Sunday - Thursday: 8:00 AM - 5:00 PM",
+          colors: {
+            primary: COLORS.primary,
+            secondary: COLORS.secondary,
+            accent: COLORS.accent
+          }
+        });
+      } finally {
+        setLoading(false);
+      }
     };
-    reader.readAsDataURL(file);
-  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+    fetchData();
+  }, [isOpen, apiUrl, form]);
 
-    fetch(`${apiUrl}/contact/contact1/`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        Swal.fire({
-          position: "top-end",
-          icon: "success",
-          title: "Contact Information Updated Successfully",
-          showConfirmButton: false,
-          timer: 3000,
-        });
-        onClose();
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.error("Error updating data:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Update Failed",
-          text: "There was an error updating the contact information",
-        });
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const values = await form.validateFields();
+
+      const response = await fetch(`${apiUrl}/contact/contact1/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
       });
-  };
 
-  if (!isOpen) return null;
+      if (!response.ok) throw new Error("Failed to save");
+
+      Swal.fire({
+        position: "top-end",
+        icon: "success",
+        title: "Contact Section Updated",
+        showConfirmButton: false,
+        timer: 3000,
+      });
+      onClose();
+    } catch (error) {
+      message.error("Failed to save changes");
+      console.error(error);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto p-4"
-    >
-      <motion.div 
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="bg-white p-8 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative"
-        style={{ border: `2px solid ${COLORS.primary}` }}
-      >
-        <button
+    <Modal
+      title={
+        <span className="text-2xl font-bold" style={{ color: COLORS.primaryDark }}>
+          Edit Contact Section
+        </span>
+      }
+      open={isOpen}
+      onCancel={onClose}
+      width={900}
+      footer={[
+        <Button
+          key="cancel"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
-          style={{ color: COLORS.primary }}
+          disabled={saving}
+          className="h-10 px-6 rounded-lg"
+          style={{ 
+            borderColor: COLORS.primary,
+            color: COLORS.primary
+          }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        <h2 className="text-3xl font-bold mb-6" style={{ color: COLORS.primaryDark }}>
-          Edit Contact Information
-        </h2>
-        
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block font-bold mb-2" style={{ color: COLORS.primaryDark }}>Header</label>
-              <input
-                type="text"
-                name="header"
-                value={formData.header}
-                onChange={handleChange}
-                className="w-full p-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                style={{ borderColor: COLORS.primary }}
-              />
-            </div>
-            
-            <div>
-              <label className="block font-bold mb-2" style={{ color: COLORS.primaryDark }}>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full p-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                style={{ borderColor: COLORS.primary }}
-              />
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <label className="block font-bold mb-2" style={{ color: COLORS.primaryDark }}>SubHeader</label>
-            <textarea
-              name="subHeader"
-              value={formData.subHeader}
-              onChange={handleChange}
-              rows="3"
-              className="w-full p-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-              style={{ borderColor: COLORS.primary }}
-            ></textarea>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block font-bold mb-2" style={{ color: COLORS.primaryDark }}>Button Text</label>
-              <input
-                name="buttonText"
-                value={formData.buttonText}
-                onChange={handleChange}
-                className="w-full p-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                style={{ borderColor: COLORS.primary }}
-              />
-            </div>
-            
-            <div>
-              <label className="block font-bold mb-2" style={{ color: COLORS.primaryDark }}>Button Link</label>
-              <input
-                name="buttonLink"
-                value={formData.buttonLink}
-                onChange={handleChange}
-                className="w-full p-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                style={{ borderColor: COLORS.primary }}
-              />
-            </div>
-          </div>
-
-          {/* Color Pickers */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div>
-              <label className="block font-bold mb-3" style={{ color: COLORS.primaryDark }}>Background Color</label>
-              <div className="flex flex-col md:flex-row gap-4 items-start">
-                <HexColorPicker
-                  color={formData.bgColor}
-                  onChange={handleBgColorChange}
-                  style={{ width: '100%', maxWidth: '200px' }}
-                />
-                <input
-                  type="text"
-                  name="bgColor"
-                  value={formData.bgColor}
-                  onChange={handleChange}
-                  className="p-3 rounded-lg border-2 w-full"
-                  style={{ borderColor: COLORS.primary }}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block font-bold mb-3" style={{ color: COLORS.primaryDark }}>Text Color</label>
-              <div className="flex flex-col md:flex-row gap-4 items-start">
-                <HexColorPicker
-                  color={formData.textColor}
-                  onChange={handleTextColorChange}
-                  style={{ width: '100%', maxWidth: '200px' }}
-                />
-                <input
-                  type="text"
-                  name="textColor"
-                  value={formData.textColor}
-                  onChange={handleChange}
-                  className="p-3 rounded-lg border-2 w-full"
-                  style={{ borderColor: COLORS.primary }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Locations Section */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold" style={{ color: COLORS.primaryDark }}>Locations</h3>
-              <motion.button
-                type="button"
-                onClick={handleAddLocation}
-                className="px-4 py-2 rounded-full font-medium"
-                style={{ 
-                  background: GRADIENTS.secondary,
-                  color: COLORS.black
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Add Location
-              </motion.button>
-            </div>
-
-            {formData.locations.map((location, index) => (
-              <motion.div 
-                key={index} 
-                className="mb-6 p-6 rounded-xl border-2"
-                style={{ borderColor: COLORS.primaryLight }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h4 className="text-lg font-bold" style={{ color: COLORS.primary }}>
-                    Location {index + 1}
-                  </h4>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveLocation(index)}
-                    className="text-red-500 hover:text-red-700 transition-colors"
-                  >
-                    Remove
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block font-medium mb-1" style={{ color: COLORS.primaryDark }}>Country</label>
-                    <input
-                      type="text"
-                      value={location.country}
-                      onChange={(e) =>
-                        handleLocationChange(index, "country", e.target.value)
-                      }
-                      className="w-full p-2 rounded-lg border-2"
-                      style={{ borderColor: COLORS.primary }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1" style={{ color: COLORS.primaryDark }}>Phone</label>
-                    <input
-                      type="text"
-                      value={location.phone}
-                      onChange={(e) =>
-                        handleLocationChange(index, "phone", e.target.value)
-                      }
-                      className="w-full p-2 rounded-lg border-2"
-                      style={{ borderColor: COLORS.primary }}
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <label className="block font-medium mb-1" style={{ color: COLORS.primaryDark }}>Address</label>
-                  <input
-                    type="text"
-                    value={location.address}
-                    onChange={(e) =>
-                      handleLocationChange(index, "address", e.target.value)
-                    }
-                    className="w-full p-2 rounded-lg border-2"
-                    style={{ borderColor: COLORS.primary }}
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="block font-medium mb-1" style={{ color: COLORS.primaryDark }}>Map Embed Link</label>
-                  <input
-                    type="text"
-                    value={location.maplink}
-                    onChange={(e) =>
-                      handleLocationChange(index, "maplink", e.target.value)
-                    }
-                    className="w-full p-2 rounded-lg border-2"
-                    style={{ borderColor: COLORS.primary }}
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="block font-medium mb-1" style={{ color: COLORS.primaryDark }}>Image Link</label>
-                  <input
-                    type="text"
-                    value={location.imgSrc}
-                    onChange={(e) =>
-                      handleLocationChange(index, "imgSrc", e.target.value)
-                    }
-                    className="w-full p-2 rounded-lg border-2 mb-2"
-                    style={{ borderColor: COLORS.primary }}
-                  />
-                  {location.imgSrc && (
-                    <img
-                      src={location.imgSrc}
-                      alt={`Location ${index + 1}`}
-                      className="mt-2 max-h-40 w-full object-cover rounded-lg"
-                    />
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Form Actions */}
-          <div className="flex justify-end gap-4">
-            <motion.button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 rounded-full font-medium border-2"
-              style={{ 
-                borderColor: COLORS.primary,
+          Cancel
+        </Button>,
+        <Button
+          key="save"
+          type="primary"
+          onClick={handleSave}
+          loading={saving}
+          className="h-10 px-6 rounded-lg font-medium"
+          style={{
+            backgroundColor: COLORS.primary,
+            borderColor: COLORS.primaryDark,
+            color: COLORS.textLight
+          }}
+        >
+          Save Changes
+        </Button>,
+      ]}
+      destroyOnClose
+      className="rounded-xl overflow-hidden"
+      bodyStyle={{ padding: 0 }}
+    >
+      <Spin spinning={loading}>
+        <Form form={form} layout="vertical">
+          <div className="p-6">
+            <Card 
+              title="Header Content" 
+              bordered={false}
+              className="rounded-xl mb-6"
+              headStyle={{ 
+                background: `linear-gradient(90deg, ${COLORS.primary}20, ${COLORS.accent}20)`,
+                borderBottom: `1px solid ${COLORS.border}`,
+                fontSize: '18px',
+                fontWeight: '600',
                 color: COLORS.primaryDark
               }}
-              whileHover={{ 
-                backgroundColor: COLORS.lightGray
-              }}
-              whileTap={{ scale: 0.95 }}
+              bodyStyle={{ padding: '24px' }}
             >
-              Cancel
-            </motion.button>
-            <motion.button
-              type="submit"
-              className="px-6 py-2 rounded-full font-medium"
-              style={{ 
-                background: GRADIENTS.primary,
-                color: COLORS.white
+              <Form.Item
+                name="sectionTitle"
+                label={<span className="font-medium" style={{ color: COLORS.textDark }}>Section Title</span>}
+                rules={[{ required: true, message: 'Please enter the title' }]}
+              >
+                <Input
+                  placeholder="Get In Touch"
+                  className="rounded-lg h-12"
+                  style={{ borderColor: COLORS.border }}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="sectionSubtitle"
+                label={<span className="font-medium" style={{ color: COLORS.textDark }}>Subtitle</span>}
+                rules={[{ required: true, message: 'Please enter the subtitle' }]}
+              >
+                <Input
+                  placeholder="We're ready to assist you..."
+                  className="rounded-lg h-12"
+                  style={{ borderColor: COLORS.border }}
+                />
+              </Form.Item>
+            </Card>
+
+            <Card 
+              title="Contact Information" 
+              bordered={false}
+              className="rounded-xl mb-6"
+              headStyle={{ 
+                background: `linear-gradient(90deg, ${COLORS.primary}20, ${COLORS.accent}20)`,
+                borderBottom: `1px solid ${COLORS.border}`,
+                fontSize: '18px',
+                fontWeight: '600',
+                color: COLORS.primaryDark
               }}
-              whileHover={{ 
-                scale: 1.05,
-                boxShadow: `0 5px 15px ${COLORS.primary}80`
-              }}
-              whileTap={{ scale: 0.95 }}
+              bodyStyle={{ padding: '24px' }}
             >
-              Save Changes
-            </motion.button>
+              <Form.Item
+                name={['contactInfo', 'phone']}
+                label={<span className="font-medium" style={{ color: COLORS.textDark }}>Phone Number</span>}
+                rules={[{ required: true, message: 'Please enter phone number' }]}
+              >
+                <Input
+                  placeholder="+966 56 705 5580"
+                  className="rounded-lg h-12"
+                  style={{ borderColor: COLORS.border }}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name={['contactInfo', 'email']}
+                label={<span className="font-medium" style={{ color: COLORS.textDark }}>Email Address</span>}
+                rules={[{ required: true, type: 'email', message: 'Please enter valid email' }]}
+              >
+                <Input
+                  placeholder="info@kaftaroperations.com"
+                  className="rounded-lg h-12"
+                  style={{ borderColor: COLORS.border }}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name={['contactInfo', 'address']}
+                label={<span className="font-medium" style={{ color: COLORS.textDark }}>Address</span>}
+                rules={[{ required: true, message: 'Please enter address' }]}
+              >
+                <TextArea
+                  rows={2}
+                  placeholder="9191 Al Olaya Dist. Riyadh 12611, Saudi Arabia"
+                  className="rounded-lg"
+                  style={{ borderColor: COLORS.border }}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="workingHours"
+                label={<span className="font-medium" style={{ color: COLORS.textDark }}>Working Hours</span>}
+                rules={[{ required: true, message: 'Please enter working hours' }]}
+              >
+                <Input
+                  placeholder="Sunday - Thursday: 8:00 AM - 5:00 PM"
+                  className="rounded-lg h-12"
+                  style={{ borderColor: COLORS.border }}
+                />
+              </Form.Item>
+            </Card>
+
+            <Card 
+              title="Contact Form Fields" 
+              bordered={false}
+              className="rounded-xl mb-6"
+              headStyle={{ 
+                background: `linear-gradient(90deg, ${COLORS.primary}20, ${COLORS.accent}20)`,
+                borderBottom: `1px solid ${COLORS.border}`,
+                fontSize: '18px',
+                fontWeight: '600',
+                color: COLORS.primaryDark
+              }}
+              bodyStyle={{ padding: '24px' }}
+            >
+              <Form.List name="formFields">
+                {(fields, { add, remove }) => (
+                  <div className="space-y-6">
+                    {fields.map(({ key, name, ...restField }, index) => (
+                      <div
+                        key={key}
+                        className="border rounded-xl p-4 hover:shadow-md transition-all"
+                        style={{ 
+                          borderColor: COLORS.border,
+                          background: index % 2 === 0 ? '#f9f9f9' : 'white'
+                        }}
+                      >
+                        <div className="flex justify-between items-center mb-4">
+                          <h4 className="font-medium" style={{ color: COLORS.primary }}>Field {index + 1}</h4>
+                          <Button
+                            danger
+                            type="text"
+                            icon={<DeleteOutlined />}
+                            onClick={() => remove(name)}
+                            style={{ color: '#ff4d4f' }}
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'name']}
+                            label={<span className="font-medium" style={{ color: COLORS.textDark }}>Field Name</span>}
+                            rules={[{ required: true, message: 'Required' }]}
+                          >
+                            <Input
+                              placeholder="e.g., fullName"
+                              className="rounded-lg"
+                              style={{ borderColor: COLORS.border }}
+                            />
+                          </Form.Item>
+
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'label']}
+                            label={<span className="font-medium" style={{ color: COLORS.textDark }}>Field Label</span>}
+                            rules={[{ required: true, message: 'Required' }]}
+                          >
+                            <Input
+                              placeholder="e.g., Full Name"
+                              className="rounded-lg"
+                              style={{ borderColor: COLORS.border }}
+                            />
+                          </Form.Item>
+
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'type']}
+                            label={<span className="font-medium" style={{ color: COLORS.textDark }}>Field Type</span>}
+                            rules={[{ required: true, message: 'Required' }]}
+                          >
+                            <Select
+                              placeholder="Select type"
+                              className="rounded-lg"
+                              style={{ width: '100%' }}
+                            >
+                              <Option value="text">Text</Option>
+                              <Option value="email">Email</Option>
+                              <Option value="tel">Phone</Option>
+                              <Option value="select">Dropdown</Option>
+                              <Option value="textarea">Text Area</Option>
+                            </Select>
+                          </Form.Item>
+                        </div>
+
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'required']}
+                          label={<span className="font-medium" style={{ color: COLORS.textDark }}>Required Field</span>}
+                          valuePropName="checked"
+                        >
+                          <Select
+                            placeholder="Is this field required?"
+                            className="rounded-lg"
+                            style={{ width: '100%' }}
+                          >
+                            <Option value={true}>Yes</Option>
+                            <Option value={false}>No</Option>
+                          </Select>
+                        </Form.Item>
+
+                        {/* Options for select fields */}
+                        {form.getFieldValue(['formFields', index, 'type']) === 'select' && (
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'options']}
+                            label={<span className="font-medium" style={{ color: COLORS.textDark }}>Dropdown Options</span>}
+                            rules={[{ required: true, message: 'Please add options' }]}
+                          >
+                            <Select
+                              mode="tags"
+                              placeholder="Add options"
+                              className="rounded-lg"
+                              style={{ width: '100%' }}
+                              tokenSeparators={[',']}
+                            >
+                              {serviceOptions.map(option => (
+                                <Option key={option} value={option}>{option}</Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                        )}
+                      </div>
+                    ))}
+
+                    <Button
+                      type="dashed"
+                      onClick={() => add({
+                        name: '',
+                        label: '',
+                        type: 'text',
+                        required: false
+                      })}
+                      icon={<PlusOutlined />}
+                      block
+                      className="h-12 rounded-xl mt-4"
+                      style={{
+                        borderColor: COLORS.primary,
+                        color: COLORS.primaryDark,
+                        fontWeight: '500'
+                      }}
+                    >
+                      Add Form Field
+                    </Button>
+                  </div>
+                )}
+              </Form.List>
+            </Card>
+
+            <Card 
+              title="Color Scheme" 
+              bordered={false}
+              className="rounded-xl"
+              headStyle={{ 
+                background: `linear-gradient(90deg, ${COLORS.primary}20, ${COLORS.accent}20)`,
+                borderBottom: `1px solid ${COLORS.border}`,
+                fontSize: '18px',
+                fontWeight: '600',
+                color: COLORS.primaryDark
+              }}
+              bodyStyle={{ padding: '24px' }}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Form.Item name={['colors', 'primary']} label={<span className="font-medium" style={{ color: COLORS.textDark }}>Primary Color</span>}>
+                  <div className="flex items-center gap-4">
+                    <Input 
+                      type="color" 
+                      className="w-16 h-10 cursor-pointer" 
+                      style={{ borderRadius: '8px' }}
+                    />
+                    <span className="text-sm" style={{ color: COLORS.textDark }}>Buttons, Headings</span>
+                  </div>
+                </Form.Item>
+                <Form.Item name={['colors', 'secondary']} label={<span className="font-medium" style={{ color: COLORS.textDark }}>Secondary Color</span>}>
+                  <div className="flex items-center gap-4">
+                    <Input 
+                      type="color" 
+                      className="w-16 h-10 cursor-pointer" 
+                      style={{ borderRadius: '8px' }}
+                    />
+                    <span className="text-sm" style={{ color: COLORS.textDark }}>Accents, Highlights</span>
+                  </div>
+                </Form.Item>
+                <Form.Item name={['colors', 'accent']} label={<span className="font-medium" style={{ color: COLORS.textDark }}>Accent Color</span>}>
+                  <div className="flex items-center gap-4">
+                    <Input 
+                      type="color" 
+                      className="w-16 h-10 cursor-pointer" 
+                      style={{ borderRadius: '8px' }}
+                    />
+                    <span className="text-sm" style={{ color: COLORS.textDark }}>Special Elements</span>
+                  </div>
+                </Form.Item>
+              </div>
+            </Card>
           </div>
-        </form>
-      </motion.div>
-    </motion.div>
+        </Form>
+      </Spin>
+    </Modal>
   );
 };
 

@@ -13,10 +13,9 @@ import IndustriesModal from './editor_modals/home_modals/IndustriesModal';
 import TimelineModal from './editor_modals/home_modals/TimelineModal';
 import AboutPreviewModal from './editor_modals/home_modals/AboutPreviewModal';
 import ContactModal from './editor_modals/home_modals/LocationModal';
-import ComprehensiveServices from './editor_modals/servicesModal/ComprehensiveServices';
-import ServiceModel from './editor_modals/servicesModal/ServiceModel';
+import CareerModal from './editor_modals/career/CareerModal';
 
-const ServicesEditor = ({ getDivider, availableShapes }) => {
+const CareerEditor = ({ getDivider, availableShapes }) => {
   const [isCarouselOpen, setCarouselOpen] = useState(false);
   const [isAboutPreview, setAboutPreview] = useState(false);
   const [isHeroOpen, setHeroOpen] = useState(false);
@@ -34,8 +33,8 @@ const ServicesEditor = ({ getDivider, availableShapes }) => {
     <div className='flex gap-40 items-start justify-between p-20 w-[1300px]'>
       {/* Buttons Section */}
       <div className='grid grid-cols-2 gap-28 font-bold text-center'>
-        <button className="btn btn-primary w-20 m-2" onClick={() => setHeroOpen(true)}>Our Services</button>
-        <button className="btn btn-primary w-20 m-2" onClick={() => setLocationOpen(true)}>Service Model</button>
+        <button className="btn btn-primary w-20 m-2" onClick={() => setHeroOpen(true)}>Career</button>
+
       </div>
 
       {/* Mockup Browser Section */}
@@ -51,11 +50,10 @@ const ServicesEditor = ({ getDivider, availableShapes }) => {
       </div>
 
       {/* Modal Components */}
-      <ComprehensiveServices isOpen={isCarouselOpen} onClose={() => setCarouselOpen(false)} />
-      <ServiceModel isOpen={isHeroOpen} onClose={() => setHeroOpen(false)} />
+      <CareerModal isOpen={isHeroOpen} onClose={() => setHeroOpen(false)} />
       
     </div>
   );
 };
 
-export default ServicesEditor;
+export default CareerEditor;
