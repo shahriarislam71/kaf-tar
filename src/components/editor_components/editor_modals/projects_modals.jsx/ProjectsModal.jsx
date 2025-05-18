@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, message, Upload, Card, Select, Tag, Divider, Spin, Space } from 'antd';
-import { PlusOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
+import { Modal, Form, Input, Button, message, Card, Select, Divider, Spin, Space } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import Swal from 'sweetalert2';
 
 const { TextArea } = Input;
@@ -21,8 +21,6 @@ const ProjectsModal = ({ isOpen, onClose }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadingIndex, setUploadingIndex] = useState(null);
   const apiUrl = import.meta.env.VITE_API_URL;
 
   // Sample industries for dropdown
@@ -76,38 +74,6 @@ const ProjectsModal = ({ isOpen, onClose }) => {
     fetchData();
   }, [isOpen, apiUrl, form]);
 
-  const handleImageUpload = async (file, projectIndex) => {
-    setUploading(true);
-    setUploadingIndex(projectIndex);
-    const formData = new FormData();
-    formData.append("image", file);
-    formData.append("category", "project_images");
-
-    try {
-      const response = await fetch(`${apiUrl}/images/`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error("Upload failed");
-
-      const { url } = await response.json();
-
-      const projects = form.getFieldValue("projects") || [];
-      projects[projectIndex] = { ...projects[projectIndex], image: url };
-      form.setFieldsValue({ projects });
-
-      return url;
-    } catch (error) {
-      message.error("Image upload failed");
-      console.error(error);
-      return null;
-    } finally {
-      setUploading(false);
-      setUploadingIndex(null);
-    }
-  };
-
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -139,35 +105,6 @@ const ProjectsModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const uploadProps = (index) => ({
-    name: "image",
-    showUploadList: false,
-    beforeUpload: (file) => {
-      handleImageUpload(file, index);
-      return false;
-    },
-  });
-
-  const renderLogoPreview = (url) => {
-    if (!url) return (
-      <div className="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center">
-        <span className="text-gray-400">Project Image Preview</span>
-      </div>
-    );
-    return (
-      <div className="mt-2">
-        <img
-          src={url}
-          className="w-full h-40 object-cover rounded-lg border"
-          alt="Project preview"
-          style={{ 
-            borderColor: COLORS.border,
-          }}
-        />
-      </div>
-    );
-  };
-
   return (
     <Modal
       title={
@@ -196,7 +133,6 @@ const ProjectsModal = ({ isOpen, onClose }) => {
           type="primary"
           onClick={handleSave}
           loading={saving}
-          disabled={uploading}
           className="h-10 px-6 rounded-lg font-medium"
           style={{
             backgroundColor: COLORS.primary,
@@ -287,38 +223,6 @@ const ProjectsModal = ({ isOpen, onClose }) => {
                                 ))}
                               </Select>
                             </Form.Item>
-
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'image']}
-                              label={<span className="font-medium" style={{ color: COLORS.textDark }}>Project Image</span>}
-                            >
-                              <div>
-                                <Space.Compact className="w-full">
-                                  <Input
-                                    placeholder="Image URL"
-                                    className="rounded-l-lg h-10"
-                                    style={{ borderColor: COLORS.border }}
-                                  />
-                                  <Upload {...uploadProps(index)}>
-                                    <Button
-                                      icon={<UploadOutlined />}
-                                      loading={uploading && uploadingIndex === index}
-                                      className="h-10 rounded-r-lg"
-                                      style={{
-                                        backgroundColor: COLORS.secondary,
-                                        borderColor: COLORS.secondary,
-                                        color: COLORS.textDark,
-                                        fontWeight: '500'
-                                      }}
-                                    >
-                                      Upload
-                                    </Button>
-                                  </Upload>
-                                </Space.Compact>
-                                {renderLogoPreview(form.getFieldValue(['projects', index, 'image']))}
-                              </div>
-                            </Form.Item>
                           </div>
 
                           <div>
@@ -362,8 +266,7 @@ const ProjectsModal = ({ isOpen, onClose }) => {
                         title: '',
                         industry: '',
                         scope: [],
-                        outcomes: [],
-                        image: ''
+                        outcomes: []
                       })}
                       icon={<PlusOutlined />}
                       block

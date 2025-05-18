@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const CareersPage = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -14,6 +14,15 @@ const CareersPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedPosition, setExpandedPosition] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    resume: null,
+    coverLetter: ''
+  });
 
   // Default data
   const defaultData = {
@@ -103,6 +112,54 @@ const CareersPage = () => {
       )
     };
     return icons[iconName] || <div className="w-8 h-8 rounded-full bg-gray-300"></div>;
+  };
+
+  const handleApplyClick = (position) => {
+    setSelectedPosition(position);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedPosition(null);
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      resume: null,
+      coverLetter: ''
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      resume: e.target.files[0]
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Here you would typically send the form data to your backend
+    console.log('Submitting application:', {
+      position: selectedPosition,
+      ...formData
+    });
+    
+    // Simulate successful submission
+    setTimeout(() => {
+      handleCloseModal();
+      // Show success message
+      alert('Application submitted successfully!');
+    }, 1000);
   };
 
   if (loading) {
@@ -320,12 +377,12 @@ const CareersPage = () => {
                 >
                   <div className="px-6 pb-6 pt-2 border-t border-gray-200">
                     <p className="text-gray-600 mb-4">{position.description}</p>
-                    <a
-                      href={`/apply?position=${position.id}`}
+                    <button
+                      onClick={() => handleApplyClick(position)}
                       className="inline-block px-6 py-2 bg-gradient-to-r from-[#7bbf42] to-[#f9b414] text-white font-medium rounded-full hover:shadow-md transition-all duration-300"
                     >
                       Apply Now
-                    </a>
+                    </button>
                   </div>
                 </motion.div>
               </motion.div>
@@ -349,6 +406,150 @@ const CareersPage = () => {
           </p>
         </motion.div>
       </div>
+
+      {/* Application Modal */}
+      <AnimatePresence>
+        {showModal && selectedPosition && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm"
+            onClick={handleCloseModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl bg-white rounded-2xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal header with gradient */}
+              <div className="bg-gradient-to-r from-[#7bbf42] to-[#70308c] p-6 text-white">
+                <h3 className="text-2xl font-bold">
+                  Apply for {selectedPosition.title}
+                </h3>
+                <p className="text-white/80">
+                  {selectedPosition.department} • {selectedPosition.location}
+                </p>
+              </div>
+
+              {/* Modal content */}
+              <div className="p-6 max-h-[70vh] overflow-y-auto">
+                <form onSubmit={handleSubmit}>
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Full Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7bbf42] focus:border-[#7bbf42]"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Email <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7bbf42] focus:border-[#7bbf42]"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7bbf42] focus:border-[#7bbf42]"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Resume/CV <span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex items-center justify-center w-full">
+                        <label className="flex flex-col w-full border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#7bbf42] transition-colors">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4">
+                            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p className="mb-2 text-sm text-gray-500">
+                              <span className="font-semibold">Click to upload</span> or drag and drop
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              PDF, DOC, DOCX (Max. 5MB)
+                            </p>
+                            {formData.resume && (
+                              <p className="mt-2 text-sm text-[#7bbf42] font-medium">
+                                {formData.resume.name}
+                              </p>
+                            )}
+                          </div>
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept=".pdf,.doc,.docx"
+                            onChange={handleFileChange}
+                            required
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Cover Letter
+                      </label>
+                      <textarea
+                        name="coverLetter"
+                        value={formData.coverLetter}
+                        onChange={handleInputChange}
+                        rows="4"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7bbf42] focus:border-[#7bbf42]"
+                        placeholder="Tell us why you'd be a great fit for this position..."
+                      ></textarea>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 flex justify-end space-x-4">
+                    <button
+                      type="button"
+                      onClick={handleCloseModal}
+                      className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2 bg-gradient-to-r from-[#7bbf42] to-[#f9b414] text-white font-medium rounded-lg hover:shadow-md transition-all duration-300"
+                    >
+                      Submit Application
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };

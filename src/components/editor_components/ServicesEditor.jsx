@@ -51,8 +51,8 @@ const ServicesEditor = ({ getDivider, availableShapes }) => {
       </div>
 
       {/* Modal Components */}
-      <ComprehensiveServices isOpen={isCarouselOpen} onClose={() => setCarouselOpen(false)} />
-      <ServiceModel isOpen={isHeroOpen} onClose={() => setHeroOpen(false)} />
+      <ComprehensiveServices isOpen={isHeroOpen} onClose={() => setHeroOpen(false)} />
+      <ServiceModel isOpen={isLocationOpen} onClose={() => setLocationOpen(false)} />
       
     </div>
   );

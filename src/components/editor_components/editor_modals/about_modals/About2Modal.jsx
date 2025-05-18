@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, message, Card, Divider, Space, Spin, Tag, Upload, Collapse, Select } from 'antd';
-import { PlusOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
+import { Modal, Form, Input, Button, message, Card, Divider, Space, Spin, Tag, Collapse, Select } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { HexColorPicker } from 'react-colorful';
 import Swal from 'sweetalert2';
 
@@ -20,7 +20,6 @@ const About2Modal = ({ isOpen, onClose }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [imageUploading, setImageUploading] = useState(false);
   const [activePanels, setActivePanels] = useState(['vision', 'mission', 'values']);
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -81,31 +80,6 @@ const About2Modal = ({ isOpen, onClose }) => {
 
     fetchData();
   }, [isOpen, apiUrl, form]);
-
-  const handleImageUpload = async (file) => {
-    setImageUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('category', 'about');
-
-      const response = await fetch(`${apiUrl}/upload/`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error('Upload failed');
-      
-      const data = await response.json();
-      form.setFieldsValue({ imageUrl: data.image });
-      message.success('Image uploaded successfully');
-    } catch (error) {
-      message.error('Image upload failed');
-      console.error(error);
-    } finally {
-      setImageUploading(false);
-    }
-  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -418,48 +392,6 @@ const About2Modal = ({ isOpen, onClose }) => {
               </Form.List>
             </Panel>
           </Collapse>
-
-          {/* Featured Image Section */}
-          <Card 
-            title={<span className="font-semibold" style={{ color: COLORS.dark }}>Featured Image</span>}
-            bordered={false} 
-            className="rounded-xl shadow-sm border-0 bg-gradient-to-r from-[#f9f9f9] to-white"
-          >
-            <Form.Item name="imageUrl">
-              <Upload
-                name="image"
-                listType="picture-card"
-                showUploadList={false}
-                beforeUpload={handleImageUpload}
-                disabled={imageUploading}
-                className="w-full"
-              >
-                {form.getFieldValue('imageUrl') ? (
-                  <div className="relative w-full h-48">
-                    <img 
-                      src={form.getFieldValue('imageUrl')} 
-                      alt="About section" 
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                      <Button 
-                        icon={<UploadOutlined />} 
-                        type="text" 
-                        className="text-white hover:text-white"
-                      >
-                        Change Image
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center p-4">
-                    <UploadOutlined className="text-2xl mb-2" />
-                    <p className="text-sm">Click to upload featured image</p>
-                  </div>
-                )}
-              </Upload>
-            </Form.Item>
-          </Card>
         </Form>
       </Spin>
     </Modal>

@@ -22,6 +22,7 @@ const EditNavbarModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [logoPreview, setLogoPreview] = useState(''); // New state for logo preview
   const apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
@@ -46,6 +47,7 @@ const EditNavbarModal = ({ isOpen, onClose }) => {
             href: "/contact"
           }
         });
+        setLogoPreview(data.logo || ''); // Initialize logo preview
       } catch (error) {
         console.error('Error fetching navbar data:', error);
         message.error('Failed to load navbar data');
@@ -62,6 +64,7 @@ const EditNavbarModal = ({ isOpen, onClose }) => {
             href: "/contact"
           }
         });
+        setLogoPreview('');
       } finally {
         setLoading(false);
       }
@@ -85,7 +88,8 @@ const EditNavbarModal = ({ isOpen, onClose }) => {
       if (!response.ok) throw new Error("Upload failed");
 
       const data = await response.json();
-      form.setFieldsValue({ logo: data.url });
+      form.setFieldsValue({ logo: data.image });
+      setLogoPreview(data.image); // Update logo preview
       message.success("Logo uploaded successfully");
     } catch (error) {
       message.error("Logo upload failed");
@@ -97,6 +101,7 @@ const EditNavbarModal = ({ isOpen, onClose }) => {
 
   const handleRemoveLogo = () => {
     form.setFieldsValue({ logo: '' });
+    setLogoPreview(''); // Clear logo preview
   };
 
   const uploadProps = {
@@ -225,13 +230,13 @@ const EditNavbarModal = ({ isOpen, onClose }) => {
                         borderColor: COLORS.primary
                       }}
                     >
-                      {form.getFieldValue('logo') ? 'Change Logo' : 'Upload Logo'}
+                      {logoPreview ? 'Change Logo' : 'Upload Logo'}
                     </Button>
                   </Upload>
-                  {form.getFieldValue('logo') && (
+                  {logoPreview && (
                     <div className="relative group">
                       <img 
-                        src={form.getFieldValue('logo')} 
+                        src={logoPreview} 
                         alt="Logo preview" 
                         className="w-full h-32 object-contain border rounded-lg p-2"
                         style={{ borderColor: COLORS.border }}

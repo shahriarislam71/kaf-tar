@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, message, Select, Upload, ColorPicker, Divider } from 'antd';
-import { PlusOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
+import { Modal, Form, Input, Button, message, Select, ColorPicker, Divider } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const { TextArea } = Input;
 
@@ -196,8 +196,6 @@ const CoreValuesModal = ({ isOpen, onClose }) => {
             )}
           </Form.List>
         </div>
-
-       
 
         {/* Color Scheme Section */}
         <div className="bg-gray-50 p-4 rounded">
